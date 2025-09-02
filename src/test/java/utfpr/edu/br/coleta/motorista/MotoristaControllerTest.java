@@ -17,6 +17,12 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * Testes de integração para o MotoristaController,
+ * utilizando MockMvc para simular requisições HTTP.
+ *
+ * Autor: Luiz Alberto dos Passos
+ */
 @WebMvcTest(MotoristaController.class)
 class MotoristaControllerTest {
 
@@ -32,6 +38,10 @@ class MotoristaControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    /**
+     * Deve retornar a lista de motoristas cadastrados.
+     * Espera HTTP 200 e o campo "nome" no JSON da resposta.
+     */
     @Test
     void deveListarMotoristas() throws Exception {
         Motorista motorista = new Motorista();
@@ -54,6 +64,10 @@ class MotoristaControllerTest {
                 .andExpect(jsonPath("$[0].nome").value("João"));
     }
 
+    /**
+     * Deve criar um novo motorista.
+     * Espera HTTP 201 e valida o campo "nome" no JSON da resposta.
+     */
     @Test
     void deveCriarMotorista() throws Exception {
         MotoristaDTO dto = new MotoristaDTO();
@@ -84,6 +98,10 @@ class MotoristaControllerTest {
                 .andExpect(jsonPath("$.nome").value("Maria"));
     }
 
+    /**
+     * Deve atualizar um motorista existente.
+     * Espera HTTP 200 e valida o novo nome no JSON da resposta.
+     */
     @Test
     void deveAtualizarMotorista() throws Exception {
         Motorista existente = new Motorista();
@@ -122,6 +140,10 @@ class MotoristaControllerTest {
                 .andExpect(jsonPath("$.nome").value("Carlos Silva"));
     }
 
+    /**
+     * Deve deletar um motorista pelo ID.
+     * Espera HTTP 204 No Content.
+     */
     @Test
     void deveDeletarMotorista() throws Exception {
         mockMvc.perform(delete("/motoristas/1"))

@@ -8,12 +8,22 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Testes de persistência para a entidade Motorista.
+ * Utiliza DataJpaTest para carregar apenas os componentes de JPA.
+ *
+ * Autor: Luiz Alberto dos Passos
+ */
 @DataJpaTest
 class MotoristaRepositoryTest {
 
     @Autowired
     private MotoristaRepository repository;
 
+    /**
+     * Deve salvar um motorista e recuperá-lo em seguida pelo ID.
+     * Verifica se os dados persistidos correspondem aos informados.
+     */
     @Test
     void deveSalvarEBuscarMotorista() {
         Motorista motorista = new Motorista();

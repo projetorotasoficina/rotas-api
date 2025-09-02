@@ -12,6 +12,12 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Testes unitários para MotoristaService.
+ * Utiliza Mockito para simular o comportamento do repositório.
+ *
+ * Autor: Luiz Alberto dos Passos
+ */
 @ExtendWith(MockitoExtension.class)
 class MotoristaServiceTest {
 
@@ -21,6 +27,10 @@ class MotoristaServiceTest {
     @InjectMocks
     private MotoristaService service;
 
+    /**
+     * Deve salvar um motorista e retornar a entidade persistida.
+     * Verifica se os dados retornados correspondem aos informados.
+     */
     @Test
     void deveSalvarMotorista() {
         Motorista motorista = new Motorista();
@@ -44,6 +54,10 @@ class MotoristaServiceTest {
         assertTrue(resultado.getAtivo());
     }
 
+    /**
+     * Deve buscar um motorista pelo ID.
+     * Espera encontrar a entidade e validar os dados.
+     */
     @Test
     void deveBuscarMotoristaPorId() {
         Motorista motorista = new Motorista();
@@ -60,6 +74,10 @@ class MotoristaServiceTest {
         assertTrue(resultado.getAtivo());
     }
 
+    /**
+     * Deve listar todos os motoristas.
+     * Espera uma lista com 2 registros.
+     */
     @Test
     void deveListarMotoristas() {
         Motorista m1 = new Motorista();
@@ -82,11 +100,15 @@ class MotoristaServiceTest {
         assertEquals("Ana", motoristas.get(0).getNome());
     }
 
+    /**
+     * Deve deletar um motorista pelo ID.
+     * Verifica se o repositório foi chamado corretamente.
+     */
     @Test
     void deveDeletarMotorista() {
         doNothing().when(repository).deleteById(1L);
 
-        service.delete(1L); // método do CrudServiceImpl
+        service.delete(1L);
 
         verify(repository, times(1)).deleteById(1L);
     }

@@ -7,102 +7,107 @@ import org.springframework.data.domain.Sort;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * Interface genérica para operações CRUD básicas.
+ *
+ * @param <T> tipo da entidade
+ * @param <I> tipo do identificador da entidade
+ *
+ * Autor: Luiz Alberto dos Passos
+ */
 public interface ICrudService<T, I extends Serializable> {
 
   /**
-   * Retorna todas as entidades persistidas do tipo T.
+   * Retorna todas as entidades persistidas.
    *
-   * @return lista com todas as entidades encontradas
+   * @return lista com todas as entidades
    */
   List<T> findAll();
 
   /**
-   * Recupera todas as entidades do tipo T, aplicando o critério de ordenação especificado.
+   * Retorna todas as entidades aplicando ordenação.
    *
-   * @param sort critério de ordenação utilizado para ordenar os resultados
-   * @return lista de entidades ordenadas conforme o sort informado
+   * @param sort critério de ordenação
+   * @return lista de entidades ordenadas
    */
   List<T> findAll(Sort sort);
 
   /**
-   * Recupera uma página de entidades com base nos critérios de paginação e ordenação especificados.
+   * Retorna uma página de entidades conforme os critérios de paginação e ordenação.
    *
-   * @param pageable informações sobre a página solicitada e critérios de ordenação
-   * @return uma página contendo as entidades encontradas
+   * @param pageable informações de paginação e ordenação
+   * @return página de entidades
    */
   Page<T> findAll(Pageable pageable);
 
   /**
-   * Salva a entidade especificada e retorna a instância persistida.
+   * Salva a entidade e retorna a instância persistida.
    *
    * @param entity entidade a ser salva
-   * @return a entidade persistida, podendo conter alterações realizadas pelo processo de
-   *     salvamento, como preenchimento de campos gerados automaticamente
+   * @return entidade persistida
    */
   T save(T entity);
 
   /**
-   * Salva a entidade especificada e garante que todas as alterações pendentes sejam imediatamente
-   * gravadas no banco de dados.
+   * Salva a entidade e sincroniza imediatamente com o banco de dados.
    *
-   * @param entity entidade a ser persistida
-   * @return a instância persistida da entidade
+   * @param entity entidade a ser salva
+   * @return entidade persistida
    */
   T saveAndFlush(T entity);
 
   /**
-   * Persiste uma coleção de entidades e retorna as instâncias resultantes.
+   * Salva uma coleção de entidades.
    *
-   * @param iterable coleção de entidades a serem persistidas
+   * @param iterable coleção de entidades
    * @return entidades persistidas
    */
   Iterable<T> save(Iterable<T> iterable);
 
   /**
-   * Sincroniza imediatamente todas as alterações pendentes das entidades com o banco de dados.
-   *
-   * <p>Utilizado para garantir que operações de escrita sejam efetivadas sem aguardar o ciclo
-   * automático de persistência.
+   * Força a sincronização imediata das alterações pendentes com o banco de dados.
    */
   void flush();
 
   /**
-   * Busca uma entidade pelo seu identificador exclusivo.
+   * Busca uma entidade pelo identificador.
    *
-   * @param i identificador único da entidade
-   * @return a entidade correspondente ao identificador, ou {@code null} se não encontrada
+   * @param i identificador da entidade
+   * @return entidade correspondente
    */
   T findOne(I i);
 
   /**
-   * Verifica se existe uma entidade persistida com o identificador informado.
+   * Verifica se existe uma entidade com o identificador informado.
    *
-   * @param i identificador único da entidade
-   * @return true se uma entidade com o identificador existir, false caso contrário
+   * @param i identificador da entidade
+   * @return true se existir, false caso contrário
    */
   boolean exists(I i);
 
   /**
-   * Retorna a quantidade total de entidades persistidas no repositório.
+   * Retorna a quantidade total de registros.
    *
-   * @return o número total de entidades armazenadas
+   * @return número de entidades persistidas
    */
   long count();
 
   /**
-   * Remove a entidade identificada pelo valor fornecido.
+   * Remove a entidade pelo identificador.
    *
-   * @param i identificador único da entidade a ser removida
+   * @param i identificador da entidade
    */
   void delete(I i);
 
-  /****
-   * Remove todas as entidades presentes no iterável fornecido.
+  /**
+   * Remove todas as entidades fornecidas.
    *
-   * @param iterable coleção de entidades a serem removidas
+   * @param iterable coleção de entidades
    */
   void delete(Iterable<? extends T> iterable);
 
-  /** Remove todas as entidades persistidas do repositório. */
+  /**
+   * Remove todas as entidades persistidas.
+   */
   void deleteAll();
 }
