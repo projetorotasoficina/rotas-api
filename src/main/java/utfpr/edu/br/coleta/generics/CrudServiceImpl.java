@@ -10,19 +10,29 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * Implementação genérica de ICrudService utilizando JpaRepository.
+ * Fornece operações básicas de CRUD com possibilidade de personalização
+ * nos métodos preSave e postSave.
+ *
+ * @param <T> tipo da entidade
+ * @param <I> tipo do identificador da entidade
+ *
+ * Autor: Luiz Alberto dos Passos
+ */
 public abstract class CrudServiceImpl<T, I extends Serializable> implements ICrudService<T, I> {
 
   /**
-   * Fornece o repositório JPA responsável pelas operações de persistência da entidade.
+   * Fornece o repositório JPA responsável pelas operações da entidade.
    *
-   * @return o repositório JPA associado ao tipo de entidade gerenciado
+   * @return repositório JPA da entidade
    */
   protected abstract JpaRepository<T, I> getRepository();
 
   /**
-   * Recupera todas as entidades do tipo T do repositório.
+   * Retorna todas as entidades do repositório.
    *
-   * @return lista contendo todas as entidades persistidas
+   * @return lista com todas as entidades
    */
   @Override
   public List<T> findAll() {
@@ -30,10 +40,10 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   }
 
   /**
-   * Recupera todas as entidades do repositório aplicando o critério de ordenação especificado.
+   * Retorna todas as entidades aplicando critério de ordenação.
    *
-   * @param sort critério de ordenação a ser utilizado na consulta
-   * @return lista de entidades ordenadas conforme o parâmetro fornecido
+   * @param sort critério de ordenação
+   * @return lista de entidades ordenadas
    */
   @Override
   public List<T> findAll(Sort sort) {
@@ -41,11 +51,10 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   }
 
   /**
-   * Recupera uma página de entidades do repositório conforme os critérios de paginação e ordenação
-   * especificados.
+   * Retorna uma página de entidades de acordo com os critérios de paginação e ordenação.
    *
-   * @param pageable objeto que define as informações de página e ordenação
-   * @return página contendo as entidades correspondentes à consulta
+   * @param pageable objeto com paginação e ordenação
+   * @return página de entidades
    */
   @Override
   public Page<T> findAll(Pageable pageable) {
@@ -53,14 +62,12 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   }
 
   /**
-   * Salva uma entidade, aplicando ganchos de pré e pós-processamento.
-   *
-   * <p>Executa o metodo {@code preSave} antes de persistir a entidade e {@code postsave} após a
-   * persistência.
+   * Salva uma entidade, aplicando validações antes e lógica adicional após.
+   * Executa preSave antes de salvar e postSave após salvar.
    *
    * @param entity entidade a ser salva
-   * @return a entidade salva, possivelmente modificada pelos ganchos de pré ou pós-processamento
-   * @throws IllegalArgumentException se a entidade fornecida for nula
+   * @return entidade salva
+   * @throws IllegalArgumentException se a entidade for nula
    */
   @Override
   @Transactional
@@ -70,41 +77,37 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
     }
     entity = preSave(entity);
     T savedEntity = getRepository().save(entity);
-    savedEntity = postsave(savedEntity);
+    savedEntity = postSave(savedEntity);
     return savedEntity;
   }
 
   /**
-   * Permite customizar ou validar a entidade antes de sua persistência.
+   * Permite customizar ou validar a entidade antes de salvar.
+   * Pode ser sobrescrito em implementações específicas.
    *
-   * <p>Pode ser sobrescrito para aplicar validações ou alterações na entidade antes de ser salva no
-   * repositório.
-   *
-   * @param entity entidade a ser processada antes do salvamento
-   * @return a entidade, possivelmente modificada, que será persistida
+   * @param entity entidade a ser processada
+   * @return entidade pronta para ser salva
    */
   public T preSave(T entity) {
     return entity;
   }
 
   /**
-   * Ponto de extensão chamado após a persistência de uma entidade.
-   *
-   * <p>Pode ser sobrescrito para executar lógica adicional após o salvamento da entidade. Por
-   * padrão, retorna a entidade sem alterações.
+   * Executa lógica adicional após o salvamento.
+   * Pode ser sobrescrito em implementações específicas.
    *
    * @param entity entidade recém-salva
-   * @return a entidade, possivelmente modificada após o salvamento
+   * @return entidade possivelmente modificada
    */
-  public T postsave(T entity) {
+  public T postSave(T entity) {
     return entity;
   }
 
   /**
-   * Salva a entidade e força a sincronização imediata das alterações com o banco de dados.
+   * Salva a entidade e força sincronização imediata com o banco.
    *
-   * @param entity entidade a ser salva e sincronizada
-   * @return a entidade persistida após o flush
+   * @param entity entidade a ser salva
+   * @return entidade salva
    */
   @Override
   @Transactional
@@ -115,8 +118,8 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   /**
    * Salva em lote todas as entidades fornecidas.
    *
-   * @param iterable coleção de entidades a serem salvas
-   * @return Iterable contendo as entidades persistidas
+   * @param iterable coleção de entidades
+   * @return entidades salvas
    */
   @Override
   @Transactional
@@ -124,32 +127,33 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
     return getRepository().saveAll(iterable);
   }
 
-  /** Sincroniza imediatamente todas as alterações pendentes do repositório com o banco de dados. */
+  /**
+   * Força sincronização imediata com o banco.
+   */
   @Override
   public void flush() {
     getRepository().flush();
   }
 
   /**
-   * Busca uma entidade pelo identificador fornecido.
+   * Busca uma entidade pelo identificador.
    *
-   * @param i identificador da entidade
-   * @return a entidade correspondente ao identificador
-   * @throws EntityNotFoundException se nenhuma entidade for encontrada com o identificador
-   *     informado
+   * @param i identificador
+   * @return entidade encontrada
+   * @throws EntityNotFoundException se não existir entidade com o id informado
    */
   @Override
   public T findOne(I i) {
     return getRepository()
-        .findById(i)
-        .orElseThrow(() -> new EntityNotFoundException("Não há entidade com o id " + i));
+            .findById(i)
+            .orElseThrow(() -> new EntityNotFoundException("Não há entidade com o id " + i));
   }
 
   /**
-   * Verifica se existe uma entidade com o identificador especificado.
+   * Verifica se existe entidade com o identificador informado.
    *
-   * @param i identificador da entidade
-   * @return {@code true} se a entidade existir, {@code false} caso contrário
+   * @param i identificador
+   * @return true se existir, false caso contrário
    */
   @Override
   public boolean exists(I i) {
@@ -157,9 +161,9 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   }
 
   /**
-   * Retorna a quantidade total de entidades armazenadas no repositório.
+   * Retorna a quantidade total de registros da entidade.
    *
-   * @return o número total de entidades persistidas
+   * @return número total de entidades
    */
   @Override
   @Transactional(readOnly = true)
@@ -168,9 +172,9 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   }
 
   /**
-   * Remove a entidade correspondente ao identificador fornecido.
+   * Remove a entidade pelo identificador.
    *
-   * @param i identificador da entidade a ser removida
+   * @param i identificador da entidade
    */
   @Override
   @Transactional
@@ -179,9 +183,9 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   }
 
   /**
-   * Remove todas as entidades fornecidas da base de dados.
+   * Remove todas as entidades fornecidas.
    *
-   * @param iterable coleção de entidades a serem removidas
+   * @param iterable coleção de entidades
    */
   @Override
   @Transactional
@@ -190,9 +194,7 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   }
 
   /**
-   * Exclui permanentemente todas as entidades do repositório.
-   *
-   * <p>Esta operação remove todos os registros da entidade correspondente no banco de dados.
+   * Remove permanentemente todas as entidades do repositório.
    */
   @Override
   @Transactional

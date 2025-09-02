@@ -14,32 +14,44 @@ import org.springframework.web.bind.annotation.*;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * Controlador genérico que provê operações CRUD (Create, Read, Update, Delete)
+ * para entidades que estendem BaseEntity, utilizando DTOs para entrada e saída.
+ *
+ * @param <T> tipo da entidade persistente
+ * @param <D> tipo do DTO utilizado
+ * @param <I> tipo do identificador da entidade
+ *
+ * Autor: Luiz Alberto dos Passos
+ */
 @RestController
 public abstract class CrudController<T extends BaseEntity, D, I extends Serializable> {
 
   /**
    * Retorna o serviço CRUD responsável pelas operações de persistência da entidade.
    *
-   * @return implementação de ICrudService correspondente à entidade e ao identificador genéricos
+   * @return implementação de ICrudService correspondente
    */
   protected abstract ICrudService<T, I> getService();
 
   /**
-   * Fornece a instância de ModelMapper usada para converter entre entidades e DTOs neste
-   * controlador CRUD.
+   * Fornece a instância de ModelMapper usada para conversão entre entidades e DTOs.
    *
-   * @return a instância de ModelMapper utilizada para mapeamento de tipos.
+   * @return instância de ModelMapper
    */
   protected abstract ModelMapper getModelMapper();
 
+  /** Classe da entidade gerenciada pelo controlador. */
   private final Class<T> typeClass;
+
+  /** Classe do DTO correspondente à entidade. */
   private final Class<D> typeDtoClass;
 
   /**
-   * Inicializa o controlador CRUD genérico com as classes da entidade e do DTO especificados.
+   * Construtor que inicializa o controlador CRUD.
    *
-   * @param typeClass classe da entidade a ser gerenciada
-   * @param typeDtoClass classe do DTO correspondente à entidade
+   * @param typeClass classe da entidade
+   * @param typeDtoClass classe do DTO
    */
   protected CrudController(Class<T> typeClass, Class<D> typeDtoClass) {
     this.typeClass = typeClass;
@@ -47,29 +59,29 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
   }
 
   /**
-   * Retorna a classe do tipo DTO gerenciado por este controlador.
+   * Retorna a classe do tipo DTO.
    *
-   * @return a classe do DTO associado ao controlador
+   * @return classe do DTO
    */
   public Class<D> getTypeDtoClass() {
     return typeDtoClass;
   }
 
   /**
-   * Converte uma entidade do tipo T em seu DTO correspondente do tipo D utilizando ModelMapper.
+   * Converte uma entidade em DTO.
    *
    * @param entity entidade a ser convertida
-   * @return DTO correspondente à entidade fornecida
+   * @return DTO correspondente
    */
   private D convertToDto(T entity) {
     return getModelMapper().map(entity, this.typeDtoClass);
   }
 
   /**
-   * Converte um DTO para a entidade correspondente do tipo gerenciado por este controlador.
+   * Converte um DTO em entidade.
    *
-   * @param entityDto o DTO a ser convertido
-   * @return a entidade resultante da conversão do DTO
+   * @param entityDto DTO a ser convertido
+   * @return entidade correspondente
    */
   protected T convertToEntity(D entityDto) {
     return getModelMapper().map(entityDto, this.typeClass);
@@ -78,7 +90,7 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
   /**
    * Retorna todos os registros convertidos para DTOs.
    *
-   * @return ResponseEntity contendo a lista de DTOs e status HTTP 200 OK
+   * @return lista de DTOs com status HTTP 200
    */
   @GetMapping
   @Operation(summary = "Retorna uma lista de todos os registros")
@@ -87,37 +99,34 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
   }
 
   /**
-   * Retorna uma página de DTOs das entidades, com suporte a paginação e ordenação opcionais.
+   * Retorna uma página de registros com paginação e ordenação.
    *
-   * @param page número da página a ser retornada (iniciando em 0)
+   * @param page número da página
    * @param size quantidade de itens por página
-   * @param order campo opcional para ordenação dos resultados
-   * @param asc define se a ordenação é ascendente (true) ou descendente (false)
-   * @return página contendo os DTOs conforme os critérios especificados
+   * @param order campo opcional de ordenação
+   * @param asc define se a ordenação é ascendente
+   * @return página de DTOs
    */
   @GetMapping("page")
-  @Operation(
-      summary = "Retorna um paginável com os registros de acordo com os critérios fornecidos")
+  @Operation(summary = "Retorna um paginável com os registros de acordo com os critérios fornecidos")
   public ResponseEntity<Page<D>> findAll(
-      @RequestParam int page,
-      @RequestParam int size,
-      @RequestParam(required = false) String order,
-      @RequestParam(required = false) Boolean asc) {
+          @RequestParam int page,
+          @RequestParam int size,
+          @RequestParam(required = false) String order,
+          @RequestParam(required = false) Boolean asc) {
     PageRequest pageRequest = PageRequest.of(page, size);
     if (order != null && asc != null) {
       pageRequest =
-          PageRequest.of(page, size, asc ? Sort.Direction.ASC : Sort.Direction.DESC, order);
+              PageRequest.of(page, size, asc ? Sort.Direction.ASC : Sort.Direction.DESC, order);
     }
     return ResponseEntity.ok(getService().findAll(pageRequest).map(this::convertToDto));
   }
 
   /**
-   * Busca uma entidade pelo identificador e retorna seu DTO correspondente.
-   *
-   * <p>Retorna HTTP 200 com o DTO se a entidade for encontrada, ou HTTP 404 se não for localizada.
+   * Busca uma entidade pelo identificador.
    *
    * @param i identificador da entidade
-   * @return ResponseEntity contendo o DTO da entidade ou status 404 se não encontrada
+   * @return DTO correspondente ou 404 se não encontrada
    */
   @GetMapping("{i}")
   @Operation(summary = "Retorna um registro de acordo com o identificador fornecido")
@@ -131,28 +140,24 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
   }
 
   /**
-   * Cria uma nova entidade a partir do DTO fornecido e retorna o DTO correspondente persistido.
+   * Cria uma nova entidade a partir do DTO.
    *
-   * @param entity DTO validado com os dados para criação da entidade
-   * @return ResponseEntity contendo o DTO salvo e status HTTP 201 Created
+   * @param entity DTO com os dados
+   * @return DTO salvo com status HTTP 201
    */
   @PostMapping
   @Operation(summary = "Cria um novo registro com os dados fornecidos")
   public ResponseEntity<D> create(@RequestBody @Valid D entity) {
     return ResponseEntity.status(HttpStatus.CREATED)
-        .body(convertToDto(getService().save(convertToEntity(entity))));
+            .body(convertToDto(getService().save(convertToEntity(entity))));
   }
 
   /**
-   * Atualiza uma entidade existente com os dados do DTO fornecido, garantindo que o identificador
-   * do caminho seja igual ao do DTO.
+   * Atualiza uma entidade existente.
    *
-   * <p>Retorna HTTP 400 se os identificadores forem diferentes.
-   *
-   * @param i identificador da entidade no caminho da requisição
+   * @param i identificador da entidade
    * @param entity DTO com os dados atualizados
-   * @return ResponseEntity contendo o DTO atualizado e status 200 em caso de sucesso, ou status 400
-   *     se houver divergência de identificadores
+   * @return DTO atualizado ou erro 400 se os IDs divergirem
    */
   @PutMapping("{i}")
   @Operation(summary = "Atualiza um registro de acordo com o identificador fornecido")
@@ -163,14 +168,14 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
     return ResponseEntity.status(HttpStatus.OK)
-        .body(convertToDto(getService().save(entityToUpdate)));
+            .body(convertToDto(getService().save(entityToUpdate)));
   }
 
   /**
-   * Verifica se existe uma entidade com o identificador especificado.
+   * Verifica se existe uma entidade pelo identificador.
    *
-   * @param i identificador da entidade a ser verificada
-   * @return ResponseEntity contendo true se a entidade existe, ou false caso contrário
+   * @param i identificador da entidade
+   * @return true se existir, false caso contrário
    */
   @GetMapping("exists/{i}")
   @Operation(summary = "Verifica se um registro existe de acordo com o identificador fornecido")
@@ -179,9 +184,9 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
   }
 
   /**
-   * Retorna a quantidade total de entidades existentes.
+   * Retorna a quantidade total de registros.
    *
-   * @return ResponseEntity contendo o número total de registros cadastrados
+   * @return total de registros
    */
   @GetMapping("count")
   @Operation(summary = "Retorna a quantidade total de registros")
@@ -190,12 +195,10 @@ public abstract class CrudController<T extends BaseEntity, D, I extends Serializ
   }
 
   /**
-   * Exclui a entidade correspondente ao identificador fornecido.
+   * Exclui a entidade pelo identificador.
    *
-   * <p>Sempre retorna HTTP 204 No Content, independentemente da existência prévia da entidade.
-   *
-   * @param i identificador da entidade a ser excluída
-   * @return resposta HTTP 204 No Content
+   * @param i identificador da entidade
+   * @return resposta sem conteúdo com status 204
    */
   @DeleteMapping("{i}")
   @Operation(summary = "Exclui um registro de acordo com o identificador fornecido")
