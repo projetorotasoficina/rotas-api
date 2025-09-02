@@ -1,4 +1,3 @@
-=====================================================
 
 -- Criação da tabela principal
 CREATE TABLE IF NOT EXISTS tb_access_code (
