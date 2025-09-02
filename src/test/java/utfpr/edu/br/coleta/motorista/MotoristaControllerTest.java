@@ -5,17 +5,15 @@ import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import utfpr.edu.br.coleta.motorista.dto.MotoristaDTO;
 
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -50,13 +48,13 @@ class MotoristaControllerTest {
         Motorista motorista = new Motorista();
         motorista.setId(1L);
         motorista.setNome("João");
-        motorista.setCpf("123");
+        motorista.setCpf("12345678901"); // CPF válido
         motorista.setAtivo(true);
 
         MotoristaDTO dto = new MotoristaDTO();
         dto.setId(1L);
         dto.setNome("João");
-        dto.setCpf("123");
+        dto.setCpf("12345678901");
         dto.setAtivo(true);
 
         when(service.findAll()).thenReturn(List.of(motorista));
@@ -75,19 +73,19 @@ class MotoristaControllerTest {
     void deveCriarMotorista() throws Exception {
         MotoristaDTO dto = new MotoristaDTO();
         dto.setNome("Maria");
-        dto.setCpf("456");
+        dto.setCpf("98765432100"); // CPF válido
         dto.setAtivo(true);
 
         Motorista salvo = new Motorista();
         salvo.setId(1L);
         salvo.setNome("Maria");
-        salvo.setCpf("456");
+        salvo.setCpf("98765432100");
         salvo.setAtivo(true);
 
         MotoristaDTO salvoDto = new MotoristaDTO();
         salvoDto.setId(1L);
         salvoDto.setNome("Maria");
-        salvoDto.setCpf("456");
+        salvoDto.setCpf("98765432100");
         salvoDto.setAtivo(true);
 
         when(modelMapper.map(any(MotoristaDTO.class), any())).thenReturn(salvo);
@@ -110,25 +108,25 @@ class MotoristaControllerTest {
         Motorista existente = new Motorista();
         existente.setId(1L);
         existente.setNome("Carlos");
-        existente.setCpf("789");
+        existente.setCpf("11122233344"); // CPF válido
         existente.setAtivo(true);
 
         Motorista atualizado = new Motorista();
         atualizado.setId(1L);
         atualizado.setNome("Carlos Silva");
-        atualizado.setCpf("789");
+        atualizado.setCpf("11122233344"); // CPF válido
         atualizado.setAtivo(true);
 
         MotoristaDTO entrada = new MotoristaDTO();
         entrada.setId(1L);
         entrada.setNome("Carlos Silva");
-        entrada.setCpf("789");
+        entrada.setCpf("11122233344"); // CPF válido
         entrada.setAtivo(true);
 
         MotoristaDTO atualizadoDto = new MotoristaDTO();
         atualizadoDto.setId(1L);
         atualizadoDto.setNome("Carlos Silva");
-        atualizadoDto.setCpf("789");
+        atualizadoDto.setCpf("11122233344"); // CPF válido
         atualizadoDto.setAtivo(true);
 
         when(service.findOne(1L)).thenReturn(existente);
@@ -149,6 +147,8 @@ class MotoristaControllerTest {
      */
     @Test
     void deveDeletarMotorista() throws Exception {
+        doNothing().when(service).delete(1L);
+
         mockMvc.perform(delete("/motoristas/1"))
                 .andExpect(status().isNoContent());
     }
