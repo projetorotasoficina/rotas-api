@@ -1,0 +1,4 @@
+CREATE TABLE tb_tipo_coleta (
+    id BIGSERIAL PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL
+);
