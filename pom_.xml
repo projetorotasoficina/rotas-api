@@ -102,8 +102,7 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>1.18.26</version>
-			<scope>provided</scope>
+			<optional>true</optional>
 		</dependency>
 
 		<!-- Testes -->
@@ -180,19 +179,15 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.11.0</version> <!-- ou outra versão recente -->
 				<configuration>
-					<release>${java.version}</release>
 					<annotationProcessorPaths>
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
-							<version>1.18.26</version>
 						</path>
 						<path>
 							<groupId>org.springframework.boot</groupId>
 							<artifactId>spring-boot-configuration-processor</artifactId>
-							<!-- opcional colocar versão, o parent do Spring Boot já resolve -->
 						</path>
 					</annotationProcessorPaths>
 				</configuration>
