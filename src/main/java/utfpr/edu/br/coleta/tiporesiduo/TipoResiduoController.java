@@ -1,30 +1,25 @@
-package utfpr.edu.br.coleta.usuario;
+package utfpr.edu.br.coleta.tiporesiduo;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import utfpr.edu.br.coleta.generics.CrudController;
 
-/**
- * Controller responsável por expor endpoints de CRUD de Usuário.
- *
- * Autor: Luiz Alberto dos Passos
- */
 @RestController
-@RequestMapping("/usuarios")
-public class UsuarioController extends CrudController<Usuario, UsuarioDTO, Long> {
+@RequestMapping("/tiporesiduo")
+public class TipoResiduoController extends CrudController<TipoResiduo, TipoResiduoDTO, Long> {
 
-    private final UsuarioService service;
+    private final TipoResiduoService service;
     private final ModelMapper modelMapper;
 
-    public UsuarioController(UsuarioService service, ModelMapper modelMapper) {
-        super(Usuario.class, UsuarioDTO.class);
+    public TipoResiduoController(TipoResiduoService service, ModelMapper modelMapper) {
+        super(TipoResiduo.class, TipoResiduoDTO.class);
         this.service = service;
         this.modelMapper = modelMapper;
     }
 
     @Override
-    protected UsuarioService getService() {
+    protected TipoResiduoService getService() {
         return service;
     }
 
