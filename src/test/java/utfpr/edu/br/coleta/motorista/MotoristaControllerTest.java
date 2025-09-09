@@ -1,14 +1,16 @@
 package utfpr.edu.br.coleta.motorista;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
 
@@ -18,37 +20,28 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-/**
- * Testes de integração para o MotoristaController,
- * utilizando MockMvc para simular requisições HTTP.
- *
- * Autor: Luiz Alberto dos Passos
- */
-@SpringBootTest
-@AutoConfigureMockMvc(addFilters = false) // Desabilita filtros de segurança no MockMvc
+@ExtendWith(MockitoExtension.class)
 class MotoristaControllerTest {
-    @Autowired
+
     private MockMvc mockMvc;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @MockBean
-    private MotoristaService service;
+    @Mock private MotoristaService service;
+    @Mock private ModelMapper modelMapper;
 
-    @MockBean
-    private ModelMapper modelMapper;
+    @InjectMocks private MotoristaController controller;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @BeforeEach
+    void setup() {
+        mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+    }
 
-    /**
-     * Deve retornar a lista de motoristas cadastrados.
-     * Espera HTTP 200 e o campo "nome" no JSON da resposta.
-     */
     @Test
     void deveListarMotoristas() throws Exception {
         Motorista motorista = new Motorista();
         motorista.setId(1L);
         motorista.setNome("João");
-        motorista.setCpf("12345678901"); // CPF válido
+        motorista.setCpf("12345678901");
         motorista.setAtivo(true);
 
         MotoristaDTO dto = new MotoristaDTO();
@@ -60,20 +53,16 @@ class MotoristaControllerTest {
         when(service.findAll()).thenReturn(List.of(motorista));
         when(modelMapper.map(motorista, MotoristaDTO.class)).thenReturn(dto);
 
-        mockMvc.perform(get("/motoristas"))
+        mockMvc.perform(get("/api/motoristas"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].nome").value("João"));
     }
 
-    /**
-     * Deve criar um novo motorista.
-     * Espera HTTP 201 e valida o campo "nome" no JSON da resposta.
-     */
     @Test
     void deveCriarMotorista() throws Exception {
         MotoristaDTO dto = new MotoristaDTO();
         dto.setNome("Maria");
-        dto.setCpf("98765432100"); // CPF válido
+        dto.setCpf("98765432100");
         dto.setAtivo(true);
 
         Motorista salvo = new Motorista();
@@ -92,64 +81,54 @@ class MotoristaControllerTest {
         when(service.save(any(Motorista.class))).thenReturn(salvo);
         when(modelMapper.map(salvo, MotoristaDTO.class)).thenReturn(salvoDto);
 
-        mockMvc.perform(post("/motoristas")
+        mockMvc.perform(post("/api/motoristas")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.nome").value("Maria"));
     }
 
-    /**
-     * Deve atualizar um motorista existente.
-     * Espera HTTP 200 e valida o novo nome no JSON da resposta.
-     */
     @Test
     void deveAtualizarMotorista() throws Exception {
         Motorista existente = new Motorista();
         existente.setId(1L);
         existente.setNome("Carlos");
-        existente.setCpf("11122233344"); // CPF válido
+        existente.setCpf("11122233344");
         existente.setAtivo(true);
 
         Motorista atualizado = new Motorista();
         atualizado.setId(1L);
         atualizado.setNome("Carlos Silva");
-        atualizado.setCpf("11122233344"); // CPF válido
+        atualizado.setCpf("11122233344");
         atualizado.setAtivo(true);
 
         MotoristaDTO entrada = new MotoristaDTO();
         entrada.setId(1L);
         entrada.setNome("Carlos Silva");
-        entrada.setCpf("11122233344"); // CPF válido
+        entrada.setCpf("11122233344");
         entrada.setAtivo(true);
 
         MotoristaDTO atualizadoDto = new MotoristaDTO();
         atualizadoDto.setId(1L);
         atualizadoDto.setNome("Carlos Silva");
-        atualizadoDto.setCpf("11122233344"); // CPF válido
+        atualizadoDto.setCpf("11122233344");
         atualizadoDto.setAtivo(true);
 
-        when(service.findOne(1L)).thenReturn(existente);
         when(service.save(any(Motorista.class))).thenReturn(atualizado);
         when(modelMapper.map(any(MotoristaDTO.class), any())).thenReturn(atualizado);
         when(modelMapper.map(atualizado, MotoristaDTO.class)).thenReturn(atualizadoDto);
 
-        mockMvc.perform(put("/motoristas/1")
+        mockMvc.perform(put("/api/motoristas/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(entrada)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.nome").value("Carlos Silva"));
     }
 
-    /**
-     * Deve deletar um motorista pelo ID.
-     * Espera HTTP 204 No Content.
-     */
     @Test
     void deveDeletarMotorista() throws Exception {
         doNothing().when(service).delete(1L);
-
-        mockMvc.perform(delete("/motoristas/1"))
+        mockMvc.perform(delete("/api/motoristas/1"))
                 .andExpect(status().isNoContent());
     }
 }

@@ -1,35 +1,38 @@
 package utfpr.edu.br.coleta.usuario;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.modelmapper.ModelMapper;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import utfpr.edu.br.coleta.generics.CrudController;
+import utfpr.edu.br.coleta.generics.ICrudService;
 
-/**
- * Controller responsável por expor endpoints de CRUD de Usuário.
- *
- * Autor: Luiz Alberto dos Passos
- */
 @RestController
-@RequestMapping("/usuarios")
-public class UsuarioController extends CrudController<Usuario, UsuarioDTO, Long> {
+@RequestMapping("/api/usuarios")
+@Tag(name = "UsuarioController", description = "Endpoints para gerenciamento de usuários")
+public class UsuarioController extends CrudController<Usuario, Usuario> {
 
-    private final UsuarioService service;
+    private final IUsuarioService usuarioService;
     private final ModelMapper modelMapper;
 
-    public UsuarioController(UsuarioService service, ModelMapper modelMapper) {
-        super(Usuario.class, UsuarioDTO.class);
-        this.service = service;
+    public UsuarioController(IUsuarioService usuarioService, ModelMapper modelMapper) {
+        super(Usuario.class, Usuario.class); // D = Usuario (sem DTO separado)
+        this.usuarioService = usuarioService;
         this.modelMapper = modelMapper;
     }
 
     @Override
-    protected UsuarioService getService() {
-        return service;
+    protected ICrudService<Usuario, Long> getService() {
+        return usuarioService;
     }
 
     @Override
     protected ModelMapper getModelMapper() {
         return modelMapper;
+    }
+
+    @GetMapping("/meu-perfil")
+    public ResponseEntity<Usuario> getMeuPerfil() {
+        return ResponseEntity.ok(usuarioService.obterUsuarioLogado());
     }
 }

@@ -15,8 +15,8 @@ import utfpr.edu.br.coleta.motorista.MotoristaDTO;
  * Autor: Luiz Alberto dos Passos
  */
 @RestController
-@RequestMapping("/motoristas")
-public class MotoristaController extends CrudController<Motorista, MotoristaDTO, Long> {
+@RequestMapping("/api/motoristas")
+public class MotoristaController extends CrudController<Motorista, MotoristaDTO> {
 
     private final MotoristaService service;
     private final ModelMapper modelMapper;

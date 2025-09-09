@@ -1,179 +1,168 @@
 package utfpr.edu.br.coleta.email;
 
-
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.ActiveProfiles;
 import utfpr.edu.br.coleta.email.enums.TipoCodigo;
 import utfpr.edu.br.coleta.email.impl.EmailServiceImpl;
 
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-/** Testes unitários para EmailController, verificando os retornos de envio e validação.
- *   Autor: Luiz Alberto dos Passos
- */
+@ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
+@DisplayName("EmailController")
 class EmailControllerTest {
 
   @Mock private EmailServiceImpl emailService;
-
   @Mock private EmailCodeValidationService validationService;
-
   @InjectMocks private EmailController controller;
 
-  @BeforeEach
-  void setUp() {}
+  private static final String EMAIL_OK = "teste@utfpr.edu.br";
+  private static final String CODIGO_OK = "ABC123";
 
-  /** Teste de envio bem-sucedido. */
-  @Test
-  void testEnviar_Success() throws IOException {
-    String email = "teste@utfpr.edu.br";
-    String tipo = "OTP_CADASTRO";
+  @Nested
+  @DisplayName("Enviar código")
+  class EnviarCodigo {
 
-    when(emailService.generateAndSendCode(email, TipoCodigo.OTP_CADASTRO)).thenReturn(null);
+    @Test
+    @DisplayName("deve retornar 200 e mensagem de sucesso")
+    void enviar_Sucesso() throws IOException {
+      when(emailService.generateAndSendCode(EMAIL_OK, TipoCodigo.OTP_CADASTRO)).thenReturn(null);
 
-    ResponseEntity<?> response = controller.enviar(email, tipo);
+      ResponseEntity<?> response = controller.enviar(EMAIL_OK, "OTP_CADASTRO");
 
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertTrue(response.getBody().toString().contains("Código enviado com sucesso"));
+      assertEquals(HttpStatus.OK, response.getStatusCode());
+      assertNotNull(response.getBody());
+      assertTrue(response.getBody().toString().contains("Código enviado com sucesso"));
+      verify(emailService).generateAndSendCode(EMAIL_OK, TipoCodigo.OTP_CADASTRO);
+      verifyNoInteractions(validationService);
+    }
+
+    @Test
+    @DisplayName("deve aceitar tipo case-insensitive (otp_cadastro)")
+    void enviar_TipoCaseInsensitive() throws IOException {
+      when(emailService.generateAndSendCode(EMAIL_OK, TipoCodigo.OTP_CADASTRO)).thenReturn(null);
+
+      ResponseEntity<?> response = controller.enviar(EMAIL_OK, "otp_cadastro");
+
+      assertEquals(HttpStatus.OK, response.getStatusCode());
+      verify(emailService).generateAndSendCode(EMAIL_OK, TipoCodigo.OTP_CADASTRO);
+    }
+
+    @Test
+    @DisplayName("deve mapear IllegalArgumentException para 400")
+    void enviar_IllegalArgumentException() throws IOException {
+      when(emailService.generateAndSendCode(eq(EMAIL_OK), any(TipoCodigo.class)))
+              .thenThrow(new IllegalArgumentException("Limite atingido"));
+
+      IllegalArgumentException ex =
+              assertThrows(IllegalArgumentException.class, () -> controller.enviar(EMAIL_OK, "OTP_CADASTRO"));
+
+      ResponseEntity<?> response = controller.handleIllegalArgumentException(ex);
+      assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+      assertNotNull(response.getBody());
+      assertTrue(response.getBody().toString().contains("Limite atingido"));
+    }
+
+    @Test
+    @DisplayName("deve mapear IOException para 500")
+    void enviar_IOException() throws IOException {
+      when(emailService.generateAndSendCode(eq(EMAIL_OK), any(TipoCodigo.class)))
+              .thenThrow(new IOException("Erro na API SendGrid"));
+
+      IOException ex = assertThrows(IOException.class, () -> controller.enviar(EMAIL_OK, "OTP_CADASTRO"));
+
+      ResponseEntity<?> response = controller.handleIOException(ex);
+      assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+      assertNotNull(response.getBody());
+      assertTrue(response.getBody().toString().contains("Falha ao enviar e-mail"));
+    }
+
+    @ParameterizedTest(name = "[{index}] tipo inválido: \"{0}\" -> BAD_REQUEST")
+    @NullAndEmptySource
+    @ValueSource(strings = {"  ", "\t", "\n", "TIPO_INEXISTENTE"})
+    void enviar_TipoInvalidoOuVazio(String tipo) {
+      IllegalArgumentException ex =
+              assertThrows(IllegalArgumentException.class, () -> controller.enviar(EMAIL_OK, tipo));
+
+      ResponseEntity<?> response = controller.handleIllegalArgumentException(ex);
+      assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+      assertNotNull(response.getBody());
+      assertTrue(response.getBody().toString().matches(".*(Tipo de código inválido|Tipo de código não informado).*"));
+      verifyNoInteractions(emailService, validationService);
+    }
+
+    @ParameterizedTest(name = "[{index}] email inválido: \"{0}\" -> BAD_REQUEST")
+    @NullAndEmptySource
+    @ValueSource(strings = {"email-invalido", "sem-arroba.com", "a@b", " a@b.com "})
+    void enviar_EmailInvalido(String email) {
+      IllegalArgumentException ex =
+              assertThrows(IllegalArgumentException.class, () -> controller.enviar(email, "OTP_CADASTRO"));
+
+      ResponseEntity<?> response = controller.handleIllegalArgumentException(ex);
+      assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+      assertNotNull(response.getBody());
+      assertTrue(response.getBody().toString().contains("Email inválido"));
+      verifyNoInteractions(emailService, validationService);
+    }
   }
 
-  /** Teste de validação de código verdadeiro. */
-  @Test
-  void testValidar_Success() {
-    String email = "teste@utfpr.edu.br";
-    String tipo = "OTP_CADASTRO";
-    String codigo = "ABC123";
+  @Nested
+  @DisplayName("Validar código")
+  class ValidarCodigo {
 
-    when(validationService.validateCode(email, TipoCodigo.OTP_CADASTRO, codigo)).thenReturn(true);
+    @Test
+    @DisplayName("deve retornar true quando o código confere")
+    void validar_Sucesso() {
+      when(validationService.validateCode(EMAIL_OK, TipoCodigo.OTP_CADASTRO, CODIGO_OK)).thenReturn(true);
 
-    ResponseEntity<Boolean> response = controller.validar(email, tipo, codigo);
+      ResponseEntity<Boolean> response = controller.validar(EMAIL_OK, "OTP_CADASTRO", CODIGO_OK);
 
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertTrue(response.getBody());
-  }
+      assertEquals(HttpStatus.OK, response.getStatusCode());
+      assertTrue(Boolean.TRUE.equals(response.getBody()));
+      verify(validationService).validateCode(EMAIL_OK, TipoCodigo.OTP_CADASTRO, CODIGO_OK);
+      verifyNoInteractions(emailService);
+    }
 
-  /** Teste de validação de código falso. */
-  @Test
-  void testValidar_CodigoInvalido() {
-    String email = "teste@utfpr.edu.br";
-    String tipo = "OTP_CADASTRO";
-    String codigo = "XYZ999";
+    @Test
+    @DisplayName("deve retornar false quando o código não confere")
+    void validar_CodigoInvalido() {
+      when(validationService.validateCode(EMAIL_OK, TipoCodigo.OTP_CADASTRO, "XYZ999")).thenReturn(false);
 
-    when(validationService.validateCode(email, TipoCodigo.OTP_CADASTRO, codigo)).thenReturn(false);
+      ResponseEntity<Boolean> response = controller.validar(EMAIL_OK, "OTP_CADASTRO", "XYZ999");
 
-    ResponseEntity<Boolean> response = controller.validar(email, tipo, codigo);
+      assertEquals(HttpStatus.OK, response.getStatusCode());
+      assertFalse(Boolean.TRUE.equals(response.getBody()));
+      verify(validationService).validateCode(EMAIL_OK, TipoCodigo.OTP_CADASTRO, "XYZ999");
+    }
 
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertFalse(response.getBody());
-  }
+    @ParameterizedTest(name = "[{index}] email formato inválido em validar: \"{0}\" -> OK/false")
+    @ValueSource(strings = {"email-invalido", "x@", "@x.com"})
+    void validar_EmailFormatoInvalido_RetornaFalse(String email) {
+      when(validationService.validateCode(eq(email), eq(TipoCodigo.OTP_CADASTRO), eq(CODIGO_OK)))
+              .thenReturn(false);
 
-  /** Teste de exceção IllegalArgumentException (ex: limite atingido). */
-  @Test
-  void testEnviar_IllegalArgumentException() throws IOException {
-    String email = "teste@utfpr.edu.br";
-    String tipo = "OTP_CADASTRO";
+      ResponseEntity<Boolean> response = controller.validar(email, "OTP_CADASTRO", CODIGO_OK);
 
-    when(emailService.generateAndSendCode(eq(email), any(TipoCodigo.class)))
-        .thenThrow(new IllegalArgumentException("Limite atingido"));
-
-    IllegalArgumentException ex =
-        assertThrows(IllegalArgumentException.class, () -> controller.enviar(email, tipo));
-
-    ResponseEntity<?> response = controller.handleIllegalArgumentException(ex);
-    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    assertTrue(response.getBody().toString().contains("Limite atingido"));
-  }
-
-  /** Teste de exceção IOException (ex: erro na API SendGrid). */
-  @Test
-  void testEnviar_IOException() throws IOException {
-    String email = "teste@utfpr.edu.br";
-    String tipo = "OTP_CADASTRO";
-
-    when(emailService.generateAndSendCode(eq(email), any(TipoCodigo.class)))
-        .thenThrow(new IOException("Erro na API SendGrid"));
-
-    IOException ex = assertThrows(IOException.class, () -> controller.enviar(email, tipo));
-
-    ResponseEntity<?> response = controller.handleIOException(ex);
-    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-    assertTrue(response.getBody().toString().contains("Falha ao enviar e-mail"));
-  }
-
-  /** Teste para e-mail inválido (regex falha). */
-  @Test
-  void testEnviar_EmailInvalido() {
-    String email = "email-invalido";
-    String tipo = "OTP_CADASTRO";
-
-    IllegalArgumentException ex =
-        assertThrows(IllegalArgumentException.class, () -> controller.enviar(email, tipo));
-
-    ResponseEntity<?> response = controller.handleIllegalArgumentException(ex);
-    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    assertTrue(response.getBody().toString().contains("Email inválido"));
-  }
-
-  /** Teste para tipo de código vazio. */
-  @Test
-  void testEnviar_TipoVazio() {
-    String email = "teste@utfpr.edu.br";
-    String tipo = "";
-
-    IllegalArgumentException ex =
-        assertThrows(IllegalArgumentException.class, () -> controller.enviar(email, tipo));
-
-    ResponseEntity<?> response = controller.handleIllegalArgumentException(ex);
-    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    assertTrue(response.getBody().toString().contains("Tipo de código não informado"));
-  }
-
-  /** Teste para e-mail nulo. */
-  @Test
-  void testEnviar_EmailNulo() {
-    String tipo = "OTP_CADASTRO"; // Alterado para corresponder ao nome do enum
-
-    IllegalArgumentException ex =
-        assertThrows(IllegalArgumentException.class, () -> controller.enviar(null, tipo));
-
-    ResponseEntity<?> response = controller.handleIllegalArgumentException(ex);
-    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    assertTrue(response.getBody().toString().contains("Email inválido"));
-  }
-
-  /** Teste para tipo nulo. */
-  @Test
-  void testEnviar_TipoNulo() {
-    String email = "teste@utfpr.edu.br";
-
-    IllegalArgumentException ex =
-        assertThrows(IllegalArgumentException.class, () -> controller.enviar(email, null));
-
-    ResponseEntity<?> response = controller.handleIllegalArgumentException(ex);
-    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    assertTrue(response.getBody().toString().contains("Tipo de código não informado"));
-  }
-
-  /** Teste para tipo inválido. */
-  @Test
-  void testEnviar_TipoInvalido() {
-    String email = "teste@utfpr.edu.br";
-    String tipo = "TIPO_INEXISTENTE";
-
-    IllegalArgumentException ex =
-        assertThrows(IllegalArgumentException.class, () -> controller.enviar(email, tipo));
-
-    ResponseEntity<?> response = controller.handleIllegalArgumentException(ex);
-    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    assertTrue(response.getBody().toString().contains("Tipo de código inválido"));
+      assertEquals(HttpStatus.OK, response.getStatusCode());
+      assertFalse(Boolean.TRUE.equals(response.getBody()));
+      verify(validationService).validateCode(email, TipoCodigo.OTP_CADASTRO, CODIGO_OK);
+      verifyNoInteractions(emailService);
+    }
   }
 }
