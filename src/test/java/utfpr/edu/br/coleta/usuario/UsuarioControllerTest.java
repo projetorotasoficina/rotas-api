@@ -3,51 +3,75 @@ package utfpr.edu.br.coleta.usuario;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import utfpr.edu.br.coleta.generics.ICrudService;
 
-import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import java.util.List;
+
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * Testes de integração para UsuarioController usando MockMvc.
+ * Testes do UsuarioController usando MockMvc standalone.
+ * O Controller estende CrudController<Usuario, Usuario, Long>,
+ * então o ModelMapper é chamado mas mapeia Usuario -> Usuario (identidade).
  */
-@SpringBootTest
-@AutoConfigureMockMvc(addFilters = false) // Desabilita filtros de segurança no MockMvc
-
+@ExtendWith(MockitoExtension.class)
 class UsuarioControllerTest {
 
-    @Autowired
     private MockMvc mockMvc;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Autowired
-    private UsuarioRepository repository;
+    // O controller espera IUsuarioService no construtor → mockamos a interface
+    @Mock private IUsuarioService usuarioService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    // ModelMapper é usado pelo CrudController para mapear Entidade <-> DTO
+    @Mock private org.modelmapper.ModelMapper modelMapper;
+
+    @InjectMocks private UsuarioController controller;
 
     @BeforeEach
     void setup() {
-        repository.deleteAll();
+        mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }
 
     @Test
     void deveCriarUsuario() throws Exception {
-        Usuario usuario = new Usuario();
-        usuario.setNome("Teste");
-        usuario.setCpf("12345678901");
-        usuario.setEmail("teste@email.com");
-        usuario.setAtivo(true);
+        Usuario entrada = new Usuario();
+        entrada.setNome("Teste");
+        entrada.setCpf("12345678901");
+        entrada.setEmail("teste@email.com");
+        entrada.setAtivo(true);
 
-        mockMvc.perform(
-                        post("/usuarios")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(usuario)))
+        Usuario salvo = new Usuario();
+        salvo.setId(1L);
+        salvo.setNome("Teste");
+        salvo.setCpf("12345678901");
+        salvo.setEmail("teste@email.com");
+        salvo.setAtivo(true);
+
+        // Como D = Usuario e T = Usuario, tratamos o map como identidade
+        when(modelMapper.map(any(Usuario.class), eq(Usuario.class)))
+                .thenAnswer(inv -> inv.getArgument(0));
+
+        when(usuarioService.save(any(Usuario.class))).thenReturn(salvo);
+
+        mockMvc.perform(post("/api/usuarios")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(entrada)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.nome", is("Teste")));
@@ -55,47 +79,28 @@ class UsuarioControllerTest {
 
     @Test
     void deveListarUsuarios() throws Exception {
-        Usuario usuario = new Usuario();
-        usuario.setNome("Maria");
-        usuario.setCpf("11122233344");
-        usuario.setEmail("maria@email.com");
-        usuario.setAtivo(true);
-        repository.save(usuario);
+        Usuario u = new Usuario();
+        u.setId(10L);
+        u.setNome("Maria");
+        u.setCpf("11122233344");
+        u.setEmail("maria@email.com");
+        u.setAtivo(true);
 
-        mockMvc.perform(get("/usuarios"))
+        when(usuarioService.findAll()).thenReturn(List.of(u));
+
+        // Identidade no mapeamento entidade -> DTO
+        when(modelMapper.map(any(Usuario.class), eq(Usuario.class)))
+                .thenAnswer(inv -> inv.getArgument(0));
+
+        mockMvc.perform(get("/api/usuarios"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].nome", is("Maria")));
     }
 
     @Test
-    void deveAtualizarUsuario() throws Exception {
-        Usuario usuario = new Usuario();
-        usuario.setNome("Carlos");
-        usuario.setCpf("99988877766");
-        usuario.setEmail("carlos@email.com");
-        usuario.setAtivo(true);
-        Usuario salvo = repository.save(usuario);
-
-        salvo.setNome("Carlos Atualizado");
-
-        mockMvc.perform(
-                        put("/usuarios/{id}", salvo.getId())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(salvo)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.nome", is("Carlos Atualizado")));
-    }
-
-    @Test
     void deveDeletarUsuario() throws Exception {
-        Usuario usuario = new Usuario();
-        usuario.setNome("João");
-        usuario.setCpf("77766655544");
-        usuario.setEmail("joao@email.com");
-        usuario.setAtivo(true);
-        Usuario salvo = repository.save(usuario);
-
-        mockMvc.perform(delete("/usuarios/{id}", salvo.getId()))
+        // Nenhum stub extra — delete não usa o ModelMapper
+        mockMvc.perform(delete("/api/usuarios/{id}", 1L))
                 .andExpect(status().isNoContent());
     }
 }

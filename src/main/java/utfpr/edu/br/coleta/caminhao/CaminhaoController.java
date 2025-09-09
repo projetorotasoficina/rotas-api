@@ -16,7 +16,7 @@ import utfpr.edu.br.coleta.generics.CrudController;
  */
 @RestController
 @RequestMapping("/caminhoes")
-public class CaminhaoController extends CrudController<Caminhao, CaminhaoDTO, Long> {
+public class CaminhaoController extends CrudController<Caminhao, CaminhaoDTO> {
 
     private final CaminhaoService service;
     private final ModelMapper modelMapper;

@@ -14,8 +14,8 @@ import utfpr.edu.br.coleta.generics.CrudController;
  * Autor: Pedro Henrique Sauthier
  */
 @RestController
-@RequestMapping("/tipocoleta")
-public class TipoColetaController extends CrudController<TipoColeta, TipoColetaDTO, Long> {
+@RequestMapping("/api/tipocoleta")
+public class TipoColetaController extends CrudController<TipoColeta, TipoColetaDTO> {
 
     private final TipoColetaService service;
     private final ModelMapper modelMapper;
