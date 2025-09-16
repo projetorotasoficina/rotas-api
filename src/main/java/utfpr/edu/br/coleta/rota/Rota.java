@@ -39,8 +39,9 @@ public class Rota extends BaseEntity {
 
     @NotNull(message = "O tipo de resíduo é obrigatório.")
     @ManyToOne
-    @JoinColumn(name = "tipo_residuo_id", nullable = false)
+    @JoinColumn(name = "residuo_id", nullable = false)
     private TipoResiduo tipoResiduo;
+
 
     @NotNull(message = "O tipo de coleta é obrigatório.")
     @ManyToOne

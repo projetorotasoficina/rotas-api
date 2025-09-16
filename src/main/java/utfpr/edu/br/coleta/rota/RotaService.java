@@ -1,5 +1,7 @@
 package utfpr.edu.br.coleta.rota;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 import utfpr.edu.br.coleta.generics.CrudServiceImpl;
 
@@ -23,5 +25,9 @@ public class RotaService extends CrudServiceImpl<Rota, Long> {
     @Override
     protected RotaRepository getRepository() {
         return repository;
+    }
+
+    public Optional<Rota> findById(long id) {
+        return repository.findById(id);
     }
 }

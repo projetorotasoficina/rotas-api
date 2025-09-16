@@ -26,5 +26,6 @@ public interface RotaRepository extends JpaRepository<Rota, Long> {
      * @param id id da rota
      * @return true se já existir, false caso contrário
      */
-    boolean existsById(Long cpf);
+    boolean existsById(Long id);
+
 }

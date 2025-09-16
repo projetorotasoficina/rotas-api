@@ -18,4 +18,16 @@ public class RotaDTO {
     @NotBlank(message = "O nome é obrigatório.")
     private String nome;
 
+    @NotNull(message = "O campo ativo é obrigatório.")
+    private Boolean ativo;
+
+    @Size(max = 400, message = "Observações podem ter no máximo 400 caracteres.")
+    private String observacoes;
+
+    @NotNull(message = "O tipo de resíduo é obrigatório.")
+    private Long tipoResiduoId;
+
+    @NotNull(message = "O tipo de coleta é obrigatório.")
+    private Long tipoColetaId;
+
 }
