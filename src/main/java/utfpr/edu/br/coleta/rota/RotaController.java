@@ -1,4 +1,4 @@
-package utfpr.edu.br.coleta.tipocoleta;
+package utfpr.edu.br.coleta.rota;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import utfpr.edu.br.coleta.generics.CrudController;
 
 /**
- * Controller responsável por expor os endpoints REST para operações de CRUD de Tipo Coleta.
+ * Controller responsável por expor os endpoints REST para operações de CRUD de Rota.
  *
  * Herda de CrudController, que já implementa endpoints genéricos
  * como GET, POST, PUT e DELETE.
@@ -14,20 +14,20 @@ import utfpr.edu.br.coleta.generics.CrudController;
  * Autor: Pedro Henrique Sauthier
  */
 @RestController
-@RequestMapping("/tipocoleta")
-public class TipoColetaController extends CrudController<TipoColeta, TipoColetaDTO> {
+@RequestMapping("/rota")
+public class RotaController extends CrudController<Rota, RotaDTO> {
 
-    private final TipoColetaService service;
+    private final RotaService service;
     private final ModelMapper modelMapper;
 
-    public TipoColetaController(TipoColetaService service, ModelMapper modelMapper) {
-        super(TipoColeta.class, TipoColetaDTO.class);
+    public RotaController(RotaService service, ModelMapper modelMapper) {
+        super(Rota.class, RotaDTO.class);
         this.service = service;
         this.modelMapper = modelMapper;
     }
 
     @Override
-    protected TipoColetaService getService() {
+    protected RotaService getService() {
         return service;
     }
 
