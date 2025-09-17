@@ -181,6 +181,7 @@ public class EmailServiceImpl {
       String mensagemHtml = springTemplateEngine.process("otp-template", context);
       return sendEmail(email, assunto, mensagemHtml, "text/html");
     } catch (Exception e) {
+      logger.error("Falha ao processar o template otp-template.html", e);
       throw new IOException("Erro ao processar o template do e-mail: " + e.getMessage(), e);
     }
   }
@@ -197,7 +198,7 @@ public class EmailServiceImpl {
    */
   public Response sendEmail(String to, String subject, String contentText, String tipo)
           throws IOException {
-    Email from = new Email("webprojeto2@gmail.com");
+    Email from = new Email("projetorotasoficina@gmail.com");
     Email toEmail = new Email(to);
     Content content = new Content(tipo, contentText);
     Mail mail = new Mail(from, subject, toEmail, content);
