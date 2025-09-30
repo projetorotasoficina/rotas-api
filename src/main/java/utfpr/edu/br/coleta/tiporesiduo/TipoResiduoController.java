@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import utfpr.edu.br.coleta.generics.CrudController;
 
 @RestController
-@RequestMapping("/api/tiporesiduo")
+@RequestMapping("/tiporesiduo")
 public class TipoResiduoController extends CrudController<TipoResiduo, TipoResiduoDTO> {
 
     private final TipoResiduoService service;

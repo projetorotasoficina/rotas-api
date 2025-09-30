@@ -83,6 +83,8 @@ public class SecurityConfig {
                                     // Rotas de autenticação - únicas acessíveis sem login
                                     .requestMatchers("/api/auth/**")
                                     .permitAll()
+                                    .requestMatchers("/api/email/**")
+                                    .permitAll()
 
                                     // Console H2 apenas em ambiente de teste
                                     .requestMatchers("/h2-console/**")
