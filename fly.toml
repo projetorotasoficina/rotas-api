@@ -19,8 +19,13 @@ primary_region = "gru" # São Paulo
     handlers = ["tls", "http"]
     port = 443
 
-  [[services.tcp_checks]]
+  [[services.http_checks]]
     interval = "10s"
     timeout = "2s"
     grace_period = "30s"
-    restart_limit = 0
+    method = "get"
+    path = "/"
+
+[resources]
+  cpu = "shared"
+  memory = "512"
