@@ -1,5 +1,5 @@
 app = "rotas-api"
-primary_region = "gru" # São Paulo (melhor latência no Brasil)
+primary_region = "gru" # São Paulo
 
 [build]
   dockerfile = "Dockerfile"
