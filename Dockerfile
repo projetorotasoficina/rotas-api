@@ -1,11 +1,15 @@
-# Etapa 1 - Build do backend
-FROM maven:3.9.4-eclipse-temurin-17 AS build
+# ========================
+# Etapa 1 - Build do backend (Java 21)
+# ========================
+FROM maven:3.9.4-eclipse-temurin-21 AS build
 WORKDIR /app
 COPY . .
 RUN ./mvnw clean package -DskipTests
 
+# ========================
 # Etapa 2 - Runtime com Postgres + API
-FROM eclipse-temurin:17-jdk
+# ========================
+FROM eclipse-temurin:21-jdk
 
 # Instalar PostgreSQL
 RUN apt-get update && \
@@ -28,7 +32,7 @@ RUN mkdir -p /var/run/postgresql && chown -R postgres:postgres /var/run/postgres
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 
-# Expor portas (API e banco)
+# Expor portas da API e do banco
 EXPOSE 8080 5432
 
 # Starta Postgres e depois a API
