@@ -21,7 +21,7 @@ import utfpr.edu.br.coleta.usuario.Usuario;
     name = "Autenticação",
     description = "Endpoints responsáveis por cadastro e autenticação de usuário")
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
   private final JwtService jwtService;
