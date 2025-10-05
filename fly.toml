@@ -23,7 +23,7 @@ port = 443
 [[services.http_checks]]
 interval = "10s"
 timeout = "5s"
-grace_period = "90s"
+grace_period = "60s"
 method = "get"
 path = "/actuator/health"
 
