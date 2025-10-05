@@ -14,7 +14,7 @@ import utfpr.edu.br.coleta.trajeto.dto.TrajetoDTO;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/trajetos")
+@RequestMapping("/trajetos")
 public class TrajetoController extends CrudController<Trajeto, TrajetoDTO> {
 
     private final ITrajetoService service;

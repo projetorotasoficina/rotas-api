@@ -7,7 +7,7 @@ import utfpr.edu.br.coleta.generics.CrudController;
 import utfpr.edu.br.coleta.incidente.dto.IncidenteDTO;
 
 @RestController
-@RequestMapping("/api/incidentes")
+@RequestMapping("/incidentes")
 public class IncidenteController extends CrudController<Incidente, IncidenteDTO> {
 
     private final IncidenteService service;

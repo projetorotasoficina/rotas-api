@@ -24,7 +24,7 @@ import java.util.Map;
  */
 @Tag(name = "Email", description = "API para envio e validação de códigos por e-mail")
 @RestController
-@RequestMapping("/api/email")
+@RequestMapping("/email")
 @Validated
 public class EmailController {
 
