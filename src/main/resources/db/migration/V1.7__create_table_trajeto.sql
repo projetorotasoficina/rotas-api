@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS postgis;
+
 CREATE TABLE trajeto (
                          id SERIAL PRIMARY KEY,
                          rota_id INT NOT NULL REFERENCES tb_rota(id),
