@@ -1,3 +1,4 @@
+
 app = "rotas-api"
 primary_region = "gru"
 
@@ -6,10 +7,10 @@ primary_region = "gru"
 
 [env]
   PORT = "8080"
-  # Mantemos a JVM com memória suficiente
-  JAVA_OPTS = "-Xms256m -Xmx768m" 
+  # Aumentamos a memória máxima da JVM para 1.5GB,
+  # deixando uma margem de 512MB para o sistema.
+  JAVA_OPTS = "-Xms256m -Xmx1536m" 
 
-# --- MUDANÇA NA ESTRATÉGIA DE CHECK ---
 [[services]]
   protocol = "tcp"
   internal_port = 8080
@@ -24,13 +25,14 @@ primary_region = "gru"
     handlers = ["tls", "http"]
     port = 443
 
-  # Usaremos apenas o TCP check, que é mais tolerante
-  # O grace_period aqui é respeitado de forma diferente
+
   [[services.tcp_checks]]
     interval = "15s"
-    timeout = "2s"
-    grace_period = "120s" # Vamos tentar 2 minutos aqui
+    timeout = "5s"
+    grace_period = "90s" 
 
-# Mantemos a memória em 1GB
 [resources]
-  memory = "1024"
+  # "performance" usa uma vCPU dedicada, muito mais rápida.
+  cpu_kind = "performance"
+  # Aumentamos a memória para 2GB (2048MB ).
+  memory = "2048"
