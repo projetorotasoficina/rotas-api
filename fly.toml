@@ -1,32 +1,38 @@
 app = "rotas-api"
-primary_region = "gru" # São Paulo - melhor latência no Brasil
+primary_region = "gru"
 
 [build]
-dockerfile = "Dockerfile"
+  dockerfile = "Dockerfile"
 
 [env]
-PORT = "8080"
-JAVA_OPTS = "-Xms256m -Xmx512m" # limita memória no plano gratuito
+  PORT = "8080"
+  # Permitindo que a JVM use mais memória, com uma margem de segurança.
+  JAVA_OPTS = "-Xms256m -Xmx768m" 
 
 [[services]]
-internal_port = 8080
-processes = ["app"]
+  internal_port = 8080
+  processes = ["app"]
 
-[[services.ports]]
-handlers = ["http"]
-port = 80
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+    force_https = true # Boa prática para forçar HTTPS
 
-[[services.ports]]
-handlers = ["tls", "http"]
-port = 443
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443
 
-[[services.http_checks]]
-interval = "10s"
-timeout = "5s"
-grace_period = "60s"
-method = "get"
-path = "/actuator/health"
+  # Dando mais tempo para a aplicação iniciar
+  [[services.http_checks]]
+    interval = "30s"
+    timeout = "15s"
+    grace_period = "180s" 
+    method = "get"
+    path = "/actuator/health"
+    protocol = "http"
 
+# --- A MUDANÇA PRINCIPAL ESTÁ AQUI ---
 [resources]
-cpu = "shared"
-memory = "512"
+  # A CPU continua a mesma do plano gratuito
+  # A memória foi aumentada para 1GB
+  memory = "1024" 
