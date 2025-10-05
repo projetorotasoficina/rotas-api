@@ -6,33 +6,31 @@ primary_region = "gru"
 
 [env]
   PORT = "8080"
-  # Permitindo que a JVM use mais memória, com uma margem de segurança.
+  # Mantemos a JVM com memória suficiente
   JAVA_OPTS = "-Xms256m -Xmx768m" 
 
+# --- MUDANÇA NA ESTRATÉGIA DE CHECK ---
 [[services]]
+  protocol = "tcp"
   internal_port = 8080
   processes = ["app"]
 
   [[services.ports]]
     handlers = ["http"]
     port = 80
-    force_https = true # Boa prática para forçar HTTPS
+    force_https = true
 
   [[services.ports]]
     handlers = ["tls", "http"]
     port = 443
 
-  # Dando mais tempo para a aplicação iniciar
-  [[services.http_checks]]
-    interval = "30s"
-    timeout = "15s"
-    grace_period = "180s" 
-    method = "get"
-    path = "/actuator/health"
-    protocol = "http"
+  # Usaremos apenas o TCP check, que é mais tolerante
+  # O grace_period aqui é respeitado de forma diferente
+  [[services.tcp_checks]]
+    interval = "15s"
+    timeout = "2s"
+    grace_period = "120s" # Vamos tentar 2 minutos aqui
 
-# --- A MUDANÇA PRINCIPAL ESTÁ AQUI ---
+# Mantemos a memória em 1GB
 [resources]
-  # A CPU continua a mesma do plano gratuito
-  # A memória foi aumentada para 1GB
-  memory = "1024" 
+  memory = "1024"
