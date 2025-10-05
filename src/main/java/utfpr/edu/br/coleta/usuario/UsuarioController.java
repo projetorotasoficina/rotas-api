@@ -8,7 +8,7 @@ import utfpr.edu.br.coleta.generics.CrudController;
 import utfpr.edu.br.coleta.generics.ICrudService;
 
 @RestController
-@RequestMapping("/api/usuarios")
+@RequestMapping("/usuarios")
 @Tag(name = "UsuarioController", description = "Endpoints para gerenciamento de usuários")
 public class UsuarioController extends CrudController<Usuario, Usuario> {
 
