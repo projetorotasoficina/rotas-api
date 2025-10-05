@@ -1,54 +1,53 @@
-app:
-  client:
-    origins: ${APP_ALLOWED_ORIGINS:http://localhost:3000}
-  security:
-    jwt:
-      secret-key: ${JWT_SECRET_KEY}
-      expiration-time: ${JWT_EXPIRATION_TIME:7200000} # 2h
-  swagger:
-    enabled: ${SWAGGER_ENABLED:false}
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
 
-spring:
-  datasource:
-    url: ${DATABASE_URL}
-    username: ${DATABASE_USERNAME:postgres}
-    password: ${DATABASE_PASSWORD}
-    driver-class-name: org.postgresql.Driver
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
 
-  sendgrid:
-    api-key: ${SPRING_SENDGRID_API_KEY}
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
 
-  thymeleaf:
-    prefix: classpath:/templates/
-    suffix: .html
-    mode: HTML
-    encoding: UTF-8
-    cache: false
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
 
-  jpa:
-    hibernate:
-      ddl-auto: none
-    properties:
-      hibernate:
-        format_sql: false
-    show-sql: true
+### VS Code ###
+.vscode/
 
-  flyway:
-    enabled: true
-    baseline-on-migrate: true
-    locations: classpath:db/migration
+# ---- Logs, classes e temporários
+*.log
+*.class
+*.swp
+*.swo
 
-  config:
-    import: optional:file:.env[.properties]
+# ---- SO
+.DS_Store
+Thumbs.db
 
-# ============================
-# SPRING ACTUATOR (Health Check)
-# ============================
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info
-  endpoint:
-    health:
-      show-details: always
+# ---- Arquivos de ambiente/segredos
+*.env
+*.env.*
+.env
+.env.*
+
+#docker
+
+docker-compose_antigo.yml
