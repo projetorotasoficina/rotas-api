@@ -7,35 +7,21 @@ COPY . .
 RUN ./mvnw clean package -DskipTests
 
 # ========================
-# Etapa 2 - Runtime com Postgres + API
+# Etapa 2 - Runtime apenas com a API
 # ========================
 FROM eclipse-temurin:21-jdk
 
-# Instalar PostgreSQL
-RUN apt-get update && \
-    apt-get install -y postgresql postgresql-contrib && \
-    rm -rf /var/lib/apt/lists/*
-
-# Variáveis padrão (sobrescritas pelo .env ou secrets no Fly)
-ENV POSTGRES_DB=coleta_bd \
-    POSTGRES_USER=postgres \
-    POSTGRES_PASSWORD=admin \
-    DATABASE_URL=jdbc:postgresql://localhost:5432/coleta_bd \
-    DATABASE_USERNAME=postgres \
-    DATABASE_PASSWORD=admin \
-    PORT=8080
-
-# Criar diretórios do Postgres
-RUN mkdir -p /var/run/postgresql && chown -R postgres:postgres /var/run/postgresql
-
-# Copiar o JAR da aplicação
+# Definir diretório de trabalho
 WORKDIR /app
+
+# Copiar o JAR gerado na etapa anterior
 COPY --from=build /app/target/*.jar app.jar
 
-# Expor portas da API e do banco
-EXPOSE 8080 5432
+# Variáveis de ambiente (substituídas pelo .env ou secrets)
+ENV PORT=8080
 
-# Starta Postgres e depois a API
-CMD service postgresql start && \
-    su postgres -c "psql -tc \"SELECT 1 FROM pg_database WHERE datname='${POSTGRES_DB}'\" | grep -q 1 || psql -c \"CREATE DATABASE ${POSTGRES_DB};\"" && \
-    java -jar app.jar
+# Expor apenas a porta da API
+EXPOSE 8080
+
+# Rodar a aplicação
+ENTRYPOINT ["java", "-jar", "app.jar"]
