@@ -3,337 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Código de Verificação - GeoColeta</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background-color: #f5f5f5;
-            padding: 20px;
-        }
-        
-        .email-container {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: #ffffff;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        
-        .header {
-            background-color: #155dfc;
-            padding: 30px 40px;
-            text-align: center;
-        }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 10px;
-        }
-        
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background-color: #ffffff;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            color: #155dfc;
-            font-weight: bold;
-        }
-        
-        .logo-text {
-            font-size: 28px;
-            font-weight: 700;
-            color: #ffffff;
-            letter-spacing: -0.5px;
-        }
-        
-        .header-subtitle {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 16px;
-            margin-top: 8px;
-        }
-        
-        .content {
-            padding: 40px;
-        }
-        
-        .greeting {
-            font-size: 20px;
-            font-weight: 600;
-            color: #333333;
-            margin-bottom: 20px;
-        }
-        
-        .message {
-            font-size: 16px;
-            color: #666666;
-            line-height: 1.6;
-            margin-bottom: 30px;
-        }
-        
-        .otp-container {
-            background: linear-gradient(135deg, #f8f9ff 0%, #e8f0ff 100%);
-            border: 2px solid #155dfc;
-            border-radius: 12px;
-            padding: 30px;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .otp-label {
-            font-size: 14px;
-            color: #155dfc;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 12px;
-        }
-        
-        .otp-code {
-            font-size: 42px;
-            font-weight: 700;
-            color: #155dfc;
-            letter-spacing: 8px;
-            font-family: 'Courier New', monospace;
-            margin: 10px 0;
-        }
-        
-        .otp-expiration {
-            font-size: 14px;
-            color: #666666;
-            margin-top: 12px;
-        }
-        
-        .expiration-highlight {
-            font-weight: 600;
-            color: #155dfc;
-        }
-        
-        .info-box {
-            background-color: #f8f9fa;
-            border-left: 4px solid #155dfc;
-            padding: 20px;
-            margin-bottom: 30px;
-            border-radius: 4px;
-        }
-        
-        .info-box-title {
-            font-size: 15px;
-            font-weight: 600;
-            color: #333333;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .info-box-text {
-            font-size: 14px;
-            color: #666666;
-            line-height: 1.5;
-        }
-        
-        .security-tips {
-            background-color: #fff8e6;
-            border-left: 4px solid #ffa500;
-            padding: 20px;
-            margin-bottom: 30px;
-            border-radius: 4px;
-        }
-        
-        .security-tips-title {
-            font-size: 15px;
-            font-weight: 600;
-            color: #333333;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .security-tips-list {
-            font-size: 14px;
-            color: #666666;
-            line-height: 1.7;
-            margin-left: 20px;
-        }
-        
-        .footer {
-            background-color: #f8f9fa;
-            padding: 30px 40px;
-            text-align: center;
-            border-top: 1px solid #e9ecef;
-        }
-        
-        .footer-text {
-            font-size: 14px;
-            color: #999999;
-            line-height: 1.6;
-            margin-bottom: 15px;
-        }
-        
-        .footer-links {
-            margin-top: 15px;
-        }
-        
-        .footer-link {
-            color: #155dfc;
-            text-decoration: none;
-            font-size: 13px;
-            margin: 0 10px;
-        }
-        
-        .footer-link:hover {
-            text-decoration: underline;
-        }
-        
-        .divider {
-            height: 1px;
-            background-color: #e9ecef;
-            margin: 20px 0;
-        }
-        
-        .brand-footer {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin-top: 20px;
-        }
-        
-        .brand-footer-icon {
-            width: 24px;
-            height: 24px;
-            background-color: #155dfc;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            color: white;
-            font-weight: bold;
-        }
-        
-        .brand-footer-text {
-            font-size: 16px;
-            font-weight: 600;
-            color: #155dfc;
-        }
-        
-        @media only screen and (max-width: 600px) {
-            .content {
-                padding: 30px 20px;
-            }
-            
-            .header {
-                padding: 25px 20px;
-            }
-            
-            .otp-code {
-                font-size: 36px;
-                letter-spacing: 6px;
-            }
-            
-            .footer {
-                padding: 25px 20px;
-            }
-        }
+    <!--[if mso]>
+    <style type="text/css">
+        body, table, td {font-family: Arial, Helvetica, sans-serif !important;}
     </style>
+    <![endif]-->
 </head>
-<body>
-    <div class="email-container">
-        <!-- Header -->
-        <div class="header">
-            <div class="logo">
-                <div class="logo-icon">♲</div>
-                <div class="logo-text">GeoColeta</div>
-            </div>
-            <div class="header-subtitle">Sistema de Rastreamento de Coleta</div>
-        </div>
-        
-        <!-- Content -->
-        <div class="content">
-            <div class="greeting">Olá!</div>
-            
-            <div class="message">
-                Você solicitou acesso ao <strong>GeoColeta</strong>. Para continuar, utilize o código de verificação abaixo:
-            </div>
-            
-            <!-- OTP Code Box -->
-            <div class="otp-container">
-                <div class="otp-label">Seu Código de Verificação</div>
-                <div class="otp-code" th:text="${otpCode}">123456</div>
-                <div class="otp-expiration">
-                    Este código expira em <span class="expiration-highlight" th:text="${expirationMinutes}">10</span> minutos
-                </div>
-            </div>
-            
-            <!-- Info Box -->
-            <div class="info-box">
-                <div class="info-box-title">
-                    ℹ️ Como usar o código
-                </div>
-                <div class="info-box-text">
-                    Copie o código acima e cole-o na tela de verificação do GeoColeta. Certifique-se de inserir todos os dígitos corretamente.
-                </div>
-            </div>
-            
-            <!-- Security Tips -->
-            <div class="security-tips">
-                <div class="security-tips-title">
-                    🔒 Dicas de Segurança
-                </div>
-                <ul class="security-tips-list">
-                    <li>Nunca compartilhe este código com outras pessoas</li>
-                    <li>Nossa equipe nunca solicitará este código por telefone ou e-mail</li>
-                    <li>Se você não solicitou este código, ignore este e-mail</li>
-                </ul>
-            </div>
-            
-            <div class="message">
-                Se você tiver alguma dúvida ou precisar de ajuda, entre em contato com nossa equipe de suporte.
-            </div>
-        </div>
-        
-        <!-- Footer -->
-        <div class="footer">
-            <div class="footer-text">
-                Este é um e-mail automático. Por favor, não responda a esta mensagem.
-            </div>
-            
-            <div class="divider"></div>
-            
-            <div class="footer-links">
-                <a href="#" class="footer-link">Termos de Uso</a>
-                <span style="color: #cccccc;">|</span>
-                <a href="#" class="footer-link">Política de Privacidade</a>
-                <span style="color: #cccccc;">|</span>
-                <a href="#" class="footer-link">Suporte</a>
-            </div>
-            
-            <div class="brand-footer">
-                <div class="brand-footer-icon">♲</div>
-                <div class="brand-footer-text">GeoColeta</div>
-            </div>
-            
-            <div class="footer-text" style="margin-top: 15px; font-size: 12px;">
-                © 2025 GeoColeta. Todos os direitos reservados.
-            </div>
-        </div>
-    </div>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+    
+    <!-- Wrapper Table -->
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f5f5f5; min-height: 100vh;">
+        <tr>
+            <td align="center" style="padding: 40px 20px;">
+                
+                <!-- Main Container -->
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #155dfc 0%, #0d47d4 100%); padding: 40px 30px; text-align: center;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                    <td align="center">
+                                        <!-- Logo Container -->
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 0 auto;">
+                                            <tr>
+                                                <td align="center" style="vertical-align: middle;">
+                                                    <!-- Logo Icon -->
+                                                    <div style="display: inline-block; width: 50px; height: 50px; background-color: #ffffff; border-radius: 50%; text-align: center; line-height: 50px; font-size: 32px; color: #155dfc; font-weight: bold; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); vertical-align: middle;">♲</div>
+                                                </td>
+                                                <td align="left" style="padding-left: 15px; vertical-align: middle;">
+                                                    <!-- Logo Text -->
+                                                    <div style="font-size: 32px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px; line-height: 1;">GeoColeta</div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        
+                                        <!-- Subtitle -->
+                                        <div style="color: rgba(255, 255, 255, 0.95); font-size: 15px; margin-top: 12px; font-weight: 500;">
+                                            Sistema de Rastreamento de Coleta
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 50px 40px;">
+                            
+                            <!-- Greeting -->
+                            <h1 style="font-size: 24px; font-weight: 600; color: #1a1a1a; margin: 0 0 20px 0; line-height: 1.3;">Olá!</h1>
+                            
+                            <!-- Message -->
+                            <p style="font-size: 16px; color: #4a4a4a; line-height: 1.6; margin: 0 0 35px 0;">
+                                Você solicitou acesso ao <strong style="color: #155dfc;">GeoColeta</strong>. Para continuar, utilize o código de verificação abaixo:
+                            </p>
+                            
+                            <!-- OTP Code Box -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 35px;">
+                                <tr>
+                                    <td style="background: linear-gradient(135deg, #f0f5ff 0%, #e6f0ff 100%); border: 3px solid #155dfc; border-radius: 16px; padding: 35px 25px; text-align: center;">
+                                        <div style="font-size: 13px; color: #155dfc; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 15px;">
+                                            SEU CÓDIGO DE VERIFICAÇÃO
+                                        </div>
+                                        <div style="font-size: 48px; font-weight: 700; color: #155dfc; letter-spacing: 10px; font-family: 'Courier New', Courier, monospace; margin: 15px 0; line-height: 1.2;">
+                                            <span th:text="${otpCode}">123456</span>
+                                        </div>
+                                        <div style="font-size: 14px; color: #666666; margin-top: 15px; line-height: 1.5;">
+                                            Este código expira em <strong style="color: #155dfc; font-weight: 600;" th:text="${expirationMinutes}">10</strong> minutos
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Info Box -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 25px;">
+                                <tr>
+                                    <td style="background-color: #f8f9fb; border-left: 5px solid #155dfc; padding: 20px 25px; border-radius: 8px;">
+                                        <div style="font-size: 15px; font-weight: 600; color: #1a1a1a; margin-bottom: 12px; line-height: 1.4;">
+                                            <span style="font-size: 18px; margin-right: 8px;">ℹ️</span> Como usar o código
+                                        </div>
+                                        <div style="font-size: 14px; color: #4a4a4a; line-height: 1.6;">
+                                            Copie o código acima e cole-o na tela de verificação do GeoColeta. Certifique-se de inserir todos os dígitos corretamente.
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Security Tips -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-bottom: 35px;">
+                                <tr>
+                                    <td style="background-color: #fffbf0; border-left: 5px solid #ff9800; padding: 20px 25px; border-radius: 8px;">
+                                        <div style="font-size: 15px; font-weight: 600; color: #1a1a1a; margin-bottom: 12px; line-height: 1.4;">
+                                            <span style="font-size: 18px; margin-right: 8px;">🔒</span> Dicas de Segurança
+                                        </div>
+                                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                            <tr>
+                                                <td style="font-size: 14px; color: #4a4a4a; line-height: 1.8; padding: 0;">
+                                                    <div style="margin-bottom: 8px; padding-left: 20px; position: relative;">
+                                                        <span style="position: absolute; left: 0; color: #ff9800;">•</span>
+                                                        Nunca compartilhe este código com outras pessoas
+                                                    </div>
+                                                    <div style="margin-bottom: 8px; padding-left: 20px; position: relative;">
+                                                        <span style="position: absolute; left: 0; color: #ff9800;">•</span>
+                                                        Nossa equipe nunca solicitará este código por telefone ou e-mail
+                                                    </div>
+                                                    <div style="padding-left: 20px; position: relative;">
+                                                        <span style="position: absolute; left: 0; color: #ff9800;">•</span>
+                                                        Se você não solicitou este código, ignore este e-mail
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Support Message -->
+                            <p style="font-size: 15px; color: #4a4a4a; line-height: 1.6; margin: 0; text-align: center;">
+                                Se você tiver alguma dúvida ou precisar de ajuda, entre em contato com nossa <strong style="color: #155dfc;">equipe de suporte</strong>.
+                            </p>
+                            
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f8f9fb; padding: 40px 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+                            
+                            <!-- Automatic Email Notice -->
+                            <p style="font-size: 13px; color: #9ca3af; line-height: 1.6; margin: 0 0 20px 0;">
+                                Este é um e-mail automático. Por favor, não responda a esta mensagem.
+                            </p>
+                            
+                            <!-- Divider -->
+                            <div style="height: 1px; background-color: #e5e7eb; margin: 25px 0;"></div>
+                            
+                            <!-- Footer Links -->
+                            <div style="margin: 20px 0;">
+                                <a href="#" style="color: #155dfc; text-decoration: none; font-size: 13px; font-weight: 500; margin: 0 12px;">Termos de Uso</a>
+                                <span style="color: #d1d5db; font-size: 13px;">|</span>
+                                <a href="#" style="color: #155dfc; text-decoration: none; font-size: 13px; font-weight: 500; margin: 0 12px;">Política de Privacidade</a>
+                                <span style="color: #d1d5db; font-size: 13px;">|</span>
+                                <a href="#" style="color: #155dfc; text-decoration: none; font-size: 13px; font-weight: 500; margin: 0 12px;">Suporte</a>
+                            </div>
+                            
+                            <!-- Divider -->
+                            <div style="height: 1px; background-color: #e5e7eb; margin: 25px 0;"></div>
+                            
+                            <!-- Brand Footer -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 20px auto 0;">
+                                <tr>
+                                    <td align="center" style="vertical-align: middle;">
+                                        <div style="display: inline-block; width: 32px; height: 32px; background-color: #155dfc; border-radius: 50%; text-align: center; line-height: 32px; font-size: 20px; color: white; font-weight: bold; vertical-align: middle;">♲</div>
+                                    </td>
+                                    <td align="left" style="padding-left: 10px; vertical-align: middle;">
+                                        <div style="font-size: 18px; font-weight: 600; color: #155dfc; line-height: 1;">GeoColeta</div>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Copyright -->
+                            <p style="font-size: 12px; color: #9ca3af; margin: 20px 0 0 0;">
+                                © 2025 GeoColeta. Todos os direitos reservados.
+                            </p>
+                            
+                        </td>
+                    </tr>
+                    
+                </table>
+                
+            </td>
+        </tr>
+    </table>
+    
 </body>
 </html>
 
