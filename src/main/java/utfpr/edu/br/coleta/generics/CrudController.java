@@ -38,7 +38,7 @@ public abstract class CrudController<T extends BaseEntity, D> {
     this.typeDtoClass = typeDtoClass;
   }
 
-  private D convertToDto(T entity) {
+  protected D convertToDto(T entity) {
     return getModelMapper().map(entity, this.typeDtoClass);
   }
 
