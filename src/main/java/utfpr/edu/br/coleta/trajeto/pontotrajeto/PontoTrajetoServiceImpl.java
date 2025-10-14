@@ -49,7 +49,18 @@ public class PontoTrajetoServiceImpl extends CrudServiceImpl<PontoTrajeto, Long>
     @Override
     public List<PontoTrajetoDTO> findByTrajeto(Long trajetoId) {
         return repository.findByTrajetoId(trajetoId).stream()
-                .map(p -> mapper.map(p, PontoTrajetoDTO.class))
+                .map(this::convertToDTO)
                 .toList();
+    }
+
+    private PontoTrajetoDTO convertToDTO(PontoTrajeto ponto) {
+        PontoTrajetoDTO dto = new PontoTrajetoDTO();
+        dto.setId(ponto.getId());
+        dto.setTrajetoId(ponto.getTrajeto().getId());
+        dto.setLatitude(ponto.getLocalizacao().getY());
+        dto.setLongitude(ponto.getLocalizacao().getX());
+        dto.setHorario(ponto.getHorario());
+        dto.setObservacao(ponto.getObservacao());
+        return dto;
     }
 }
