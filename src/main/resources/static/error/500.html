@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Erro 500 - GeoColeta</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f0ff 0%, #e8f4ff 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            max-width: 1200px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .left-panel {
+            flex: 1;
+            padding: 60px 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 40px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: #3b82f6;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-icon svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .error-code {
+            font-size: 80px;
+            font-weight: bold;
+            color: #3b82f6;
+            margin-bottom: 20px;
+            line-height: 1;
+        }
+
+        .error-title {
+            font-size: 32px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 15px;
+        }
+
+        .error-message {
+            font-size: 16px;
+            color: #6b7280;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .error-details {
+            background: #f9fafb;
+            border-left: 4px solid #3b82f6;
+            padding: 15px 20px;
+            margin: 20px 0 30px 0;
+            border-radius: 5px;
+        }
+
+        .error-details p {
+            font-size: 14px;
+            color: #4b5563;
+            margin: 5px 0;
+        }
+
+        .error-details strong {
+            color: #1f2937;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #3b82f6;
+            border: 2px solid #3b82f6;
+        }
+
+        .btn-secondary:hover {
+            background: #eff6ff;
+            transform: translateY(-2px);
+        }
+
+        .footer-text {
+            margin-top: 40px;
+            font-size: 14px;
+            color: #9ca3af;
+        }
+
+        .footer-text a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+
+        .footer-text a:hover {
+            text-decoration: underline;
+        }
+
+        .right-panel {
+            flex: 1;
+            background: linear-gradient(135deg, #f5f0ff 0%, #e8f4ff 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            position: relative;
+        }
+
+        .illustration {
+            max-width: 100%;
+            height: auto;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        @media (max-width: 968px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .right-panel {
+                min-height: 300px;
+            }
+
+            .left-panel {
+                padding: 40px 30px;
+            }
+
+            .error-code {
+                font-size: 60px;
+            }
+
+            .error-title {
+                font-size: 26px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    </svg>
+                </div>
+                <span class="logo-text">GeoColeta</span>
+            </div>
+
+            <div class="error-code">500</div>
+            <h1 class="error-title">Erro Interno do Servidor</h1>
+            <p class="error-message">
+                Ocorreu um erro inesperado no servidor. Nossa equipe foi notificada e está trabalhando para resolver o problema. Por favor, tente novamente mais tarde.
+            </p>
+
+            <div class="error-details">
+                <p><strong>Tipo de Erro:</strong> Internal Server Error</p>
+                <p><strong>Status:</strong> 500</p>
+                <p><strong>Data/Hora:</strong> <span id="datetime"></span></p>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="location.reload()">
+                    Tentar Novamente
+                </button>
+                <a href="/" class="btn btn-secondary">
+                    Ir para Página Inicial
+                </a>
+            </div>
+
+            <p class="footer-text">
+                Ao prosseguir, você concorda com nossos <a href="/termos">Termos de Uso</a> e <a href="/privacidade">Política de Privacidade</a>
+            </p>
+        </div>
+
+        <div class="right-panel">
+            <img src="truck-illustration.png" alt="GeoColeta Truck" class="illustration">
+        </div>
+    </div>
+
+    <script>
+        function updateDateTime() {
+            const now = new Date();
+            const options = { 
+                weekday: 'short', 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                timeZone: 'UTC'
+            };
+            document.getElementById('datetime').textContent = now.toLocaleString('pt-BR', options) + ' UTC';
+        }
+        
+        updateDateTime();
+    </script>
+</body>
+</html>
+
