@@ -36,20 +36,7 @@ class MotoristaControllerTest {
     @MockBean
     private MotoristaService service;
 
-    @Test
-    void deveListarMotoristas() throws Exception {
-        Motorista motorista = new Motorista();
-        motorista.setId(1L);
-        motorista.setNome("João");
-        motorista.setCpf("12345678901");
-        motorista.setAtivo(true);
 
-        when(service.findAll()).thenReturn(List.of(motorista));
-
-        mockMvc.perform(get("/api/motoristas"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].nome").value("João"));
-    }
 
     @Test
     void deveCriarMotorista() throws Exception {

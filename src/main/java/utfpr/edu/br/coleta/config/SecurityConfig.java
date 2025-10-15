@@ -22,6 +22,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import utfpr.edu.br.coleta.auth.jwt.JwtAuthenticationFilter;
 import utfpr.edu.br.coleta.auth.otp.EmailOtpAuthenticationProvider;
+import utfpr.edu.br.coleta.aplicativoandroid.apptoken.AppTokenFilter;
 
 import java.util.Arrays;
 import java.util.List;
@@ -43,8 +44,8 @@ public class SecurityConfig {
 
   /** Construtor com injeção de dependências */
   public SecurityConfig(
-      Environment environment,
-      EmailOtpAuthenticationProvider emailOtpAuthenticationProvider) {
+          Environment environment,
+          EmailOtpAuthenticationProvider emailOtpAuthenticationProvider) {
     this.environment = environment;
     this.emailOtpAuthenticationProvider = emailOtpAuthenticationProvider;
   }
@@ -52,65 +53,82 @@ public class SecurityConfig {
   /** Configura a cadeia de filtros de segurança HTTP da aplicação */
   @Bean
   public SecurityFilterChain securityFilterChain(
-      HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
+          HttpSecurity http,
+          JwtAuthenticationFilter jwtAuthenticationFilter,
+          AppTokenFilter appTokenFilter) throws Exception {
 
     http.cors(c -> c.configurationSource(corsConfigurationSource()))
-        .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**", "/h2-console/**"))
-        .headers(h -> h.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
-        .authorizeHttpRequests(authorize ->
-            authorize
-                // ✅ Health Checks (Fly.io / Actuator)
-                .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+            .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**", "/h2-console/**"))
+            .headers(h -> h.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
+            .authorizeHttpRequests(authorize ->
+                    authorize
+                            // ✅ Health Checks (Fly.io / Actuator)
+                            .requestMatchers("/actuator/health", "/actuator/info").permitAll()
 
-                // Rotas de autenticação - únicas acessíveis sem login
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/email/**").permitAll()
+                            // Rotas de autenticação - únicas acessíveis sem login
+                            .requestMatchers("/api/auth/**").permitAll()
+                            .requestMatchers("/api/email/**").permitAll()
 
-                // Console H2 apenas em ambiente de teste
-                .requestMatchers("/h2-console/**").access(isTestProfile())
+                            // ✅ Endpoint público de ativação Android
+                            .requestMatchers("/api/app/activate").permitAll()
 
-                // Swagger apenas se habilitado
-                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html/**")
-                .access(isSwaggerEnabled())
+                            // Console H2 apenas em ambiente de teste
+                            .requestMatchers("/h2-console/**").access(isTestProfile())
 
-                // CORS preflight
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                            // Swagger apenas se habilitado
+                            .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html/**")
+                            .access(isSwaggerEnabled())
 
-                // Página de erro
-                .requestMatchers("/error").permitAll()
+                            // CORS preflight
+                            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                // Operações de criação (POST) - apenas SUPER_ADMIN
-                .requestMatchers(HttpMethod.POST, "/api/usuarios/**").hasAuthority("ROLE_SUPER_ADMIN")
-                .requestMatchers(HttpMethod.POST, "/api/motoristas/**").hasAuthority("ROLE_SUPER_ADMIN")
-                .requestMatchers(HttpMethod.POST, "/api/caminhoes/**").hasAuthority("ROLE_SUPER_ADMIN")
-                .requestMatchers(HttpMethod.POST, "/api/tipocoleta/**").hasAuthority("ROLE_SUPER_ADMIN")
-                .requestMatchers(HttpMethod.POST, "/api/tiporesiduo/**").hasAuthority("ROLE_SUPER_ADMIN")
+                            // Página de erro
+                            .requestMatchers("/error").permitAll()
 
-                // Operações de exclusão (DELETE) - apenas SUPER_ADMIN
-                .requestMatchers(HttpMethod.DELETE, "/api/usuarios/**").hasAuthority("ROLE_SUPER_ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/motoristas/**").hasAuthority("ROLE_SUPER_ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/caminhoes/**").hasAuthority("ROLE_SUPER_ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/tipocoleta/**").hasAuthority("ROLE_SUPER_ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/tiporesiduo/**").hasAuthority("ROLE_SUPER_ADMIN")
+                            // ✅ Endpoints de gerenciamento de códigos e tokens - apenas SUPER_ADMIN
+                            .requestMatchers("/api/codigosativacao/**").hasAuthority("ROLE_SUPER_ADMIN")
+                            .requestMatchers("/api/apptokens/**").hasAuthority("ROLE_SUPER_ADMIN")
 
-                // Operações de atualização (PUT) - apenas SUPER_ADMIN
-                .requestMatchers(HttpMethod.PUT, "/api/usuarios/**").hasAuthority("ROLE_SUPER_ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/motoristas/**").hasAuthority("ROLE_SUPER_ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/caminhoes/**").hasAuthority("ROLE_SUPER_ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/tipocoleta/**").hasAuthority("ROLE_SUPER_ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/tiporesiduo/**").hasAuthority("ROLE_SUPER_ADMIN")
+                            // Operações de criação (POST) - apenas SUPER_ADMIN
+                            .requestMatchers(HttpMethod.POST, "/api/usuarios/**").hasAuthority("ROLE_SUPER_ADMIN")
+                            .requestMatchers(HttpMethod.POST, "/api/motoristas/**").hasAuthority("ROLE_SUPER_ADMIN")
+                            .requestMatchers(HttpMethod.POST, "/api/caminhoes/**").hasAuthority("ROLE_SUPER_ADMIN")
+                            .requestMatchers(HttpMethod.POST, "/api/tipocoleta/**").hasAuthority("ROLE_SUPER_ADMIN")
+                            .requestMatchers(HttpMethod.POST, "/api/tiporesiduo/**").hasAuthority("ROLE_SUPER_ADMIN")
 
-                // Operações de consulta (GET) - usuários autenticados
-                .requestMatchers(HttpMethod.GET, "/api/usuarios/meu-perfil").authenticated()
-                .requestMatchers(HttpMethod.GET, "/api/**")
-                .hasAnyAuthority("ROLE_SUPER_ADMIN", "ROLE_ADMIN_CONSULTA")
+                            // ✅ MODIFICADO: POST de trajetos e incidentes - SUPER_ADMIN ou APP_ANDROID
+                            .requestMatchers(HttpMethod.POST, "/api/trajetos/**")
+                            .hasAnyAuthority("ROLE_SUPER_ADMIN", "ROLE_APP_ANDROID")
+                            .requestMatchers(HttpMethod.POST, "/api/incidentes/**")
+                            .hasAnyAuthority("ROLE_SUPER_ADMIN", "ROLE_APP_ANDROID")
 
-                // Qualquer outra requisição requer autenticação
-                .anyRequest().authenticated()
-        )
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authenticationProvider(emailOtpAuthenticationProvider)
-        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                            // Operações de exclusão (DELETE) - apenas SUPER_ADMIN
+                            .requestMatchers(HttpMethod.DELETE, "/api/usuarios/**").hasAuthority("ROLE_SUPER_ADMIN")
+                            .requestMatchers(HttpMethod.DELETE, "/api/motoristas/**").hasAuthority("ROLE_SUPER_ADMIN")
+                            .requestMatchers(HttpMethod.DELETE, "/api/caminhoes/**").hasAuthority("ROLE_SUPER_ADMIN")
+                            .requestMatchers(HttpMethod.DELETE, "/api/tipocoleta/**").hasAuthority("ROLE_SUPER_ADMIN")
+                            .requestMatchers(HttpMethod.DELETE, "/api/tiporesiduo/**").hasAuthority("ROLE_SUPER_ADMIN")
+
+                            // Operações de atualização (PUT) - apenas SUPER_ADMIN
+                            .requestMatchers(HttpMethod.PUT, "/api/usuarios/**").hasAuthority("ROLE_SUPER_ADMIN")
+                            .requestMatchers(HttpMethod.PUT, "/api/motoristas/**").hasAuthority("ROLE_SUPER_ADMIN")
+                            .requestMatchers(HttpMethod.PUT, "/api/caminhoes/**").hasAuthority("ROLE_SUPER_ADMIN")
+                            .requestMatchers(HttpMethod.PUT, "/api/tipocoleta/**").hasAuthority("ROLE_SUPER_ADMIN")
+                            .requestMatchers(HttpMethod.PUT, "/api/tiporesiduo/**").hasAuthority("ROLE_SUPER_ADMIN")
+
+                            // Operações de consulta (GET) - SUPER_ADMIN, ADMIN_CONSULTA ou APP_ANDROID
+                            .requestMatchers(HttpMethod.GET, "/api/usuarios/meu-perfil").authenticated()
+                            .requestMatchers(HttpMethod.GET, "/api/**")
+                            .hasAnyAuthority("ROLE_SUPER_ADMIN", "ROLE_ADMIN_CONSULTA", "ROLE_APP_ANDROID")
+
+                            // Qualquer outra requisição requer autenticação
+                            .anyRequest().authenticated()
+            )
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authenticationProvider(emailOtpAuthenticationProvider)
+            // ✅ Adicionar AppTokenFilter ANTES do JwtAuthenticationFilter
+            .addFilterBefore(appTokenFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
   }
@@ -118,15 +136,15 @@ public class SecurityConfig {
   /** Retorna um AuthorizationManager que concede acesso somente quando o perfil ativo inclui "test". */
   private AuthorizationManager<RequestAuthorizationContext> isTestProfile() {
     return (authentication, context) ->
-        Arrays.asList(environment.getActiveProfiles()).contains("test")
-            ? new AuthorizationDecision(true)
-            : new AuthorizationDecision(false);
+            Arrays.asList(environment.getActiveProfiles()).contains("test")
+                    ? new AuthorizationDecision(true)
+                    : new AuthorizationDecision(false);
   }
 
   /** Retorna um AuthorizationManager que permite acesso apenas se o Swagger estiver habilitado. */
   private AuthorizationManager<RequestAuthorizationContext> isSwaggerEnabled() {
     return (authentication, context) ->
-        isSwaggerEnabled ? new AuthorizationDecision(true) : new AuthorizationDecision(false);
+            isSwaggerEnabled ? new AuthorizationDecision(true) : new AuthorizationDecision(false);
   }
 
   /** Cria e retorna a configuração de CORS para a aplicação. */
@@ -135,7 +153,8 @@ public class SecurityConfig {
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.setAllowedOriginPatterns(allowedOrigins);
     configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-    configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept"));
+    // ✅ Adicionar X-App-Token aos headers permitidos
+    configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept", "X-App-Token"));
     configuration.setAllowCredentials(true);
 
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -146,7 +165,8 @@ public class SecurityConfig {
   /** Fornece o bean AuthenticationManager configurado pelo Spring Security. */
   @Bean
   public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
-      throws Exception {
+          throws Exception {
     return config.getAuthenticationManager();
   }
 }
+
