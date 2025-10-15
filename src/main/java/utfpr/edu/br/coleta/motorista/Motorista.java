@@ -36,7 +36,7 @@ public class Motorista extends BaseEntity {
     private String cpf;
 
     /** Categoria da CNH do motorista (A, B, C, D ou E). Opcional. */
-    @Pattern(regexp = "A|B|C|D|E", message = "Categoria da CNH inválida.")
+    @Pattern(regexp = "A|B|C|D|E|AB|AC|AD|AE", message = "Categoria da CNH inválida.")
     @Column(name = "cnh_categoria", length = 2)
     private String cnhCategoria;
 
