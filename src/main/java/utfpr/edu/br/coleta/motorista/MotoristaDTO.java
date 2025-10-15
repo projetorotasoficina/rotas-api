@@ -26,7 +26,7 @@ public class MotoristaDTO {
     private String cpf;
 
     /** Categoria da CNH do motorista (A, B, C, D ou E). Opcional. */
-    @Pattern(regexp = "A|B|C|D|E", message = "Categoria da CNH inválida.")
+    @Pattern(regexp = "A|B|C|D|E|AB|AC|AD|AE", message = "Categoria da CNH inválida.")
     private String cnhCategoria;
 
     /** Data de validade da CNH. Deve ser futura. Opcional. */
