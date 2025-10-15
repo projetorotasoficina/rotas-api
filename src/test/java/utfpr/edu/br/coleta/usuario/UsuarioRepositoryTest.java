@@ -2,7 +2,7 @@ package utfpr.edu.br.coleta.usuario;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import utfpr.edu.br.coleta.config.AbstractIntegrationTest;
 
 import java.util.Optional;
 
@@ -10,9 +10,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Testes para UsuarioRepository garantindo persistência e consultas básicas.
+ * Utiliza Testcontainers com PostgreSQL + PostGIS para garantir paridade com produção.
  */
-@DataJpaTest
-class UsuarioRepositoryTest {
+class UsuarioRepositoryTest extends AbstractIntegrationTest {
 
     @Autowired
     private UsuarioRepository repository;

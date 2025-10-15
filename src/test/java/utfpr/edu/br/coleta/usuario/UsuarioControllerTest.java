@@ -1,52 +1,41 @@
 package utfpr.edu.br.coleta.usuario;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import utfpr.edu.br.coleta.generics.ICrudService;
 
 import java.util.List;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
- * Testes do UsuarioController usando MockMvc standalone.
- * O Controller estende CrudController<Usuario, Usuario, Long>,
- * então o ModelMapper é chamado mas mapeia Usuario -> Usuario (identidade).
+ * Testes de integração do UsuarioController.
+ * Usa @SpringBootTest para carregar o contexto completo e suportar herança de CrudController.
  */
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
+@AutoConfigureMockMvc
+@WithMockUser(roles = "SUPER_ADMIN")
 class UsuarioControllerTest {
 
+    @Autowired
     private MockMvc mockMvc;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    // O controller espera IUsuarioService no construtor → mockamos a interface
-    @Mock private IUsuarioService usuarioService;
-
-    // ModelMapper é usado pelo CrudController para mapear Entidade <-> DTO
-    @Mock private org.modelmapper.ModelMapper modelMapper;
-
-    @InjectMocks private UsuarioController controller;
-
-    @BeforeEach
-    void setup() {
-        mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
-    }
+    @MockBean
+    private IUsuarioService usuarioService;
 
     @Test
     void deveCriarUsuario() throws Exception {
@@ -63,13 +52,10 @@ class UsuarioControllerTest {
         salvo.setEmail("teste@email.com");
         salvo.setAtivo(true);
 
-        // Como D = Usuario e T = Usuario, tratamos o map como identidade
-        when(modelMapper.map(any(Usuario.class), eq(Usuario.class)))
-                .thenAnswer(inv -> inv.getArgument(0));
-
         when(usuarioService.save(any(Usuario.class))).thenReturn(salvo);
 
         mockMvc.perform(post("/api/usuarios")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(entrada)))
                 .andExpect(status().isCreated())
@@ -88,10 +74,6 @@ class UsuarioControllerTest {
 
         when(usuarioService.findAll()).thenReturn(List.of(u));
 
-        // Identidade no mapeamento entidade -> DTO
-        when(modelMapper.map(any(Usuario.class), eq(Usuario.class)))
-                .thenAnswer(inv -> inv.getArgument(0));
-
         mockMvc.perform(get("/api/usuarios"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].nome", is("Maria")));
@@ -99,8 +81,8 @@ class UsuarioControllerTest {
 
     @Test
     void deveDeletarUsuario() throws Exception {
-        // Nenhum stub extra — delete não usa o ModelMapper
-        mockMvc.perform(delete("/api/usuarios/{id}", 1L))
+        mockMvc.perform(delete("/api/usuarios/{id}", 1L)
+                        .with(csrf()))
                 .andExpect(status().isNoContent());
     }
 }

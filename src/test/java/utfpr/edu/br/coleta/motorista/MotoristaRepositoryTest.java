@@ -2,7 +2,7 @@ package utfpr.edu.br.coleta.motorista;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import utfpr.edu.br.coleta.config.AbstractIntegrationTest;
 
 import java.util.Optional;
 
@@ -10,12 +10,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Testes de persistência para a entidade Motorista.
- * Utiliza DataJpaTest para carregar apenas os componentes de JPA.
+ * Utiliza Testcontainers com PostgreSQL + PostGIS para garantir paridade com produção.
  *
  * Autor: Luiz Alberto dos Passos
  */
-@DataJpaTest
-class MotoristaRepositoryTest {
+class MotoristaRepositoryTest extends AbstractIntegrationTest {
 
     @Autowired
     private MotoristaRepository repository;
