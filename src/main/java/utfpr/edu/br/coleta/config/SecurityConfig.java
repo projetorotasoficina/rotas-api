@@ -116,6 +116,9 @@ public class SecurityConfig {
                             .requestMatchers(HttpMethod.PUT, "/api/tipocoleta/**").hasAuthority("ROLE_SUPER_ADMIN")
                             .requestMatchers(HttpMethod.PUT, "/api/tiporesiduo/**").hasAuthority("ROLE_SUPER_ADMIN")
 
+                            .requestMatchers(HttpMethod.GET, "/api/motoristas/**")
+                            .hasAnyAuthority("ROLE_SUPER_ADMIN", "ROLE_ADMIN_CONSULTA", "ROLE_APP_ANDROID")
+
                             // Operações de consulta (GET) - SUPER_ADMIN, ADMIN_CONSULTA ou APP_ANDROID
                             .requestMatchers(HttpMethod.GET, "/api/usuarios/meu-perfil").authenticated()
                             .requestMatchers(HttpMethod.GET, "/api/**")
