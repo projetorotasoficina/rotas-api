@@ -18,8 +18,9 @@ import java.util.List;
 /**
  * Filtro que valida o token do aplicativo Android em requisições específicas.
  * 
- * Este filtro intercepta requisições para endpoints que o app Android pode acessar
- * e valida se o header "X-App-Token" contém um token válido.
+ * Este filtro APENAS processa requisições que contêm o header "X-App-Token".
+ * Requisições com "Authorization: Bearer {jwt}" (usuários web) são ignoradas
+ * e processadas pelo JwtAuthenticationFilter.
  * 
  * Endpoints permitidos para o app Android:
  * - GET /api/motoristas/** (consultar motoristas)
@@ -54,38 +55,37 @@ public class AppTokenFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
         String method = request.getMethod();
+        String appToken = request.getHeader("X-App-Token");
+        String authHeader = request.getHeader("Authorization");
 
-        // Verifica se é um endpoint que requer validação de app token
-        if (requerValidacaoAppToken(method, path)) {
-            String appToken = request.getHeader("X-App-Token");
-
-            if (appToken == null || appToken.isBlank()) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.setContentType("application/json");
-                response.getWriter().write("{\"erro\":\"Token do aplicativo ausente\"}");
-                return;
-            }
-
-            if (!appTokenService.isValidToken(appToken)) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.setContentType("application/json");
-                response.getWriter().write("{\"erro\":\"Token do aplicativo inválido\"}");
-                return;
-            }
-
-            // ✅ NOVO: Autenticar no contexto do Spring Security
-            // Cria uma autenticação com a role ROLE_APP_ANDROID
-            UsernamePasswordAuthenticationToken authentication = 
-                new UsernamePasswordAuthenticationToken(
-                    "app-android", // principal (identificador)
-                    null, // credentials (não precisa de senha)
-                    List.of(new SimpleGrantedAuthority("ROLE_APP_ANDROID")) // authorities
-                );
+        // ✅ CORREÇÃO: Só processa se tiver X-App-Token E não tiver Authorization
+        // Se tem Authorization (JWT), deixa o JwtAuthenticationFilter processar
+        if (appToken != null && !appToken.isBlank() && 
+            (authHeader == null || !authHeader.startsWith("Bearer "))) {
             
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            // Verifica se é um endpoint que o app Android pode acessar
+            if (requerValidacaoAppToken(method, path)) {
+                
+                if (!appTokenService.isValidToken(appToken)) {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"erro\":\"Token do aplicativo inválido\"}");
+                    return;
+                }
 
-            // Atualiza último acesso
-            appTokenService.updateLastAccess(appToken);
+                // Autenticar no contexto do Spring Security com ROLE_APP_ANDROID
+                UsernamePasswordAuthenticationToken authentication = 
+                    new UsernamePasswordAuthenticationToken(
+                        "app-android",
+                        null,
+                        List.of(new SimpleGrantedAuthority("ROLE_APP_ANDROID"))
+                    );
+                
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                // Atualiza último acesso
+                appTokenService.updateLastAccess(appToken);
+            }
         }
 
         filterChain.doFilter(request, response);
@@ -112,4 +112,3 @@ public class AppTokenFilter extends OncePerRequestFilter {
         }
     }
 }
-
