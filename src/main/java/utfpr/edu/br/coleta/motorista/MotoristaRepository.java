@@ -1,5 +1,7 @@
 package utfpr.edu.br.coleta.motorista;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
@@ -27,4 +29,13 @@ public interface MotoristaRepository extends JpaRepository<Motorista, Long> {
      * @return true se já existir, false caso contrário
      */
     boolean existsByCpf(String cpf);
+
+    /**
+     * Busca motoristas por nome (case-insensitive).
+     *
+     * @param nome termo de busca
+     * @param pageable informações de paginação
+     * @return página de motoristas que correspondem à busca
+     */
+    Page<Motorista> findByNomeContainingIgnoreCase(String nome, Pageable pageable);
 }

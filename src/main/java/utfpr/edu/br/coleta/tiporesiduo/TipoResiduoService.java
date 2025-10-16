@@ -2,6 +2,8 @@ package utfpr.edu.br.coleta.tiporesiduo;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import utfpr.edu.br.coleta.generics.CrudServiceImpl;
@@ -73,5 +75,13 @@ public class TipoResiduoService extends CrudServiceImpl<TipoResiduo, Long> {
         }
 
         repository.deleteById(id);
+    }
+
+    @Override
+    public Page<TipoResiduo> findAll(Pageable pageable, String search) {
+        if (search == null || search.trim().isEmpty()) {
+            return findAll(pageable);
+        }
+        return repository.findByNomeContainingIgnoreCase(search, pageable);
     }
 }

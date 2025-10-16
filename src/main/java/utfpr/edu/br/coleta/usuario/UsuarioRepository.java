@@ -1,5 +1,7 @@
 package utfpr.edu.br.coleta.usuario;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -31,4 +33,14 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
      * @return lista de Optional contendo os usuários encontrados
      */
     List<Usuario> findByNomeContainingIgnoreCase(String nomeParcial);
+
+    /**
+     * Busca usuários por nome ou email (case-insensitive).
+     *
+     * @param nome termo de busca para nome
+     * @param email termo de busca para email
+     * @param pageable informações de paginação
+     * @return página de usuários que correspondem à busca
+     */
+    Page<Usuario> findByNomeContainingIgnoreCaseOrEmailContainingIgnoreCase(String nome, String email, Pageable pageable);
 }
