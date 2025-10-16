@@ -36,7 +36,7 @@ public class Caminhao extends BaseEntity {
 
     /** Placa do caminhão, única e obrigatória. */
     @NotBlank(message = "A placa é obrigatória.")
-    @Pattern(regexp = "[A-Z]{3}-\\d{4}", message = "Placa deve estar no formato XXX-0000.")
+    @Pattern(regexp = "([A-Z]{3}\\d{4})|([A-Z]{3}\\d[A-Z]\\d{2})", message = "Placa deve estar no formato XXX0000 ou XXX0X00.")
     @Column(nullable = false, unique = true, length = 8)
     private String placa;
 
