@@ -2,7 +2,7 @@
 
 ![Badge de Build](https://img.shields.io/badge/build-passing-brightgreen) ![Badge de Cobertura de Testes](https://img.shields.io/badge/coverage-85%25-yellow) ![Badge de Licença](https://img.shields.io/badge/license-MIT-blue)
 
-Um sistema de API REST para gerenciamento de rotas de coleta de lixo, desenvolvido como parte do projeto da disciplina de Oficina de Integração 3 do curso de Engenharia de Software da UTFPR-CP.
+Um sistema de API REST para gerenciamento de rotas de coleta de lixo, desenvolvido como parte do projeto da disciplina de Oficina de Projeto e Desenvolvimento do curso de Tecnologia em Análise e Desenvolvimeto de Sistemas da Universidade Tenologica Federal do Paraná Campus Pato Branco.
 
 ## Tabela de Conteúdos
 
