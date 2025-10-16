@@ -1,5 +1,7 @@
 package utfpr.edu.br.coleta.tipocoleta;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import utfpr.edu.br.coleta.generics.CrudServiceImpl;
 
@@ -23,5 +25,13 @@ public class TipoColetaService extends CrudServiceImpl<TipoColeta, Long> {
     @Override
     protected TipoColetaRepository getRepository() {
         return repository;
+    }
+
+    @Override
+    public Page<TipoColeta> findAll(Pageable pageable, String search) {
+        if (search == null || search.trim().isEmpty()) {
+            return findAll(pageable);
+        }
+        return repository.findByNomeContainingIgnoreCase(search, pageable);
     }
 }

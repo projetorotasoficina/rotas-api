@@ -1,5 +1,7 @@
 package utfpr.edu.br.coleta.usuario;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -87,5 +89,13 @@ public class UsuarioServiceImpl extends CrudServiceImpl<Usuario, Long>
 
     usuario.setAtivo(true);
     usuarioRepository.save(usuario);
+  }
+
+  @Override
+  public Page<Usuario> findAll(Pageable pageable, String search) {
+    if (search == null || search.trim().isEmpty()) {
+      return findAll(pageable);
+    }
+    return usuarioRepository.findByNomeContainingIgnoreCaseOrEmailContainingIgnoreCase(search, search, pageable);
   }
 }
