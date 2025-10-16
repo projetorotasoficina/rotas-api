@@ -62,6 +62,23 @@ public abstract class CrudServiceImpl<T, I extends Serializable> implements ICru
   }
 
   /**
+   * Retorna uma página de entidades filtradas por busca textual.
+   * Se search for null ou vazio, retorna todas as entidades.
+   * Classes filhas devem sobrescrever este método para implementar busca personalizada.
+   *
+   * @param pageable objeto com paginação e ordenação
+   * @param search termo de busca (opcional)
+   * @return página de entidades filtradas
+   */
+  @Override
+  public Page<T> findAll(Pageable pageable, String search) {
+    if (search == null || search.trim().isEmpty()) {
+      return findAll(pageable);
+    }
+    return findAll(pageable);
+  }
+
+  /**
    * Salva uma entidade, aplicando validações antes e lógica adicional após.
    * Executa preSave antes de salvar e postSave após salvar.
    *

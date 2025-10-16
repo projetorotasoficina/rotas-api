@@ -1,6 +1,8 @@
 package utfpr.edu.br.coleta.caminhao;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import utfpr.edu.br.coleta.generics.CrudServiceImpl;
 
@@ -28,5 +30,13 @@ public class CaminhaoServiceImpl extends CrudServiceImpl<Caminhao, Long> impleme
       //  }
 
         repository.delete(caminhao);
+    }
+
+    @Override
+    public Page<Caminhao> findAll(Pageable pageable, String search) {
+        if (search == null || search.trim().isEmpty()) {
+            return findAll(pageable);
+        }
+        return repository.findByModeloContainingIgnoreCaseOrPlacaContainingIgnoreCase(search, search, pageable);
     }
 }

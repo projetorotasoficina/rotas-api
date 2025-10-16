@@ -1,5 +1,7 @@
 package utfpr.edu.br.coleta.tipocoleta;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
@@ -27,4 +29,13 @@ public interface TipoColetaRepository extends JpaRepository<TipoColeta, Long> {
      * @return true se já existir, false caso contrário
      */
     boolean existsById(Long cpf);
+
+    /**
+     * Busca tipos de coleta por nome (case-insensitive).
+     *
+     * @param nome termo de busca
+     * @param pageable informações de paginação
+     * @return página de tipos de coleta que correspondem à busca
+     */
+    Page<TipoColeta> findByNomeContainingIgnoreCase(String nome, Pageable pageable);
 }

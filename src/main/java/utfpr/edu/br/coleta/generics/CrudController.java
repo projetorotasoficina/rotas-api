@@ -57,12 +57,13 @@ public abstract class CrudController<T extends BaseEntity, D> {
           @RequestParam int page,
           @RequestParam int size,
           @RequestParam(required = false) String order,
-          @RequestParam(required = false) Boolean asc) {
+          @RequestParam(required = false) Boolean asc,
+          @RequestParam(required = false) String search) {
     PageRequest pageRequest = PageRequest.of(page, size);
     if (order != null && asc != null) {
       pageRequest = PageRequest.of(page, size, asc ? Sort.Direction.ASC : Sort.Direction.DESC, order);
     }
-    return ResponseEntity.ok(getService().findAll(pageRequest).map(this::convertToDto));
+    return ResponseEntity.ok(getService().findAll(pageRequest, search).map(this::convertToDto));
   }
 
   @GetMapping("{id}")

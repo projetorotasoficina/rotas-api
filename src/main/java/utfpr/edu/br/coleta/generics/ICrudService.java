@@ -41,6 +41,15 @@ public interface ICrudService<T, I extends Serializable> {
   Page<T> findAll(Pageable pageable);
 
   /**
+   * Retorna uma página de entidades filtradas por busca textual.
+   *
+   * @param pageable informações de paginação e ordenação
+   * @param search termo de busca (opcional)
+   * @return página de entidades filtradas
+   */
+  Page<T> findAll(Pageable pageable, String search);
+
+  /**
    * Salva a entidade e retorna a instância persistida.
    *
    * @param entity entidade a ser salva
