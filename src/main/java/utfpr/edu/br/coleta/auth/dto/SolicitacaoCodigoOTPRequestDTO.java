@@ -8,8 +8,7 @@ import lombok.Data;
 @Data
 @Builder
 public class SolicitacaoCodigoOTPRequestDTO {
-  @Email(
-      regexp = "^[a-zA-Z0-9._%+-]+@(alunos\\.utfpr\\.edu\\.br|utfpr\\.edu\\.br)$",
-      message = "E-mail deve ser @utfpr.edu.br ou @alunos.utfpr.edu.br")
-  @NotEmpty private String email;
+  @Email(message = "E-mail deve ser válido")
+  @NotEmpty
+  private String email;
 }
