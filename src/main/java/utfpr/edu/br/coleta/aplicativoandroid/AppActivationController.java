@@ -19,7 +19,7 @@ import java.util.Map;
  * @author Luiz Alberto dos Passos
  */
 @RestController
-@RequestMapping("/app")
+@RequestMapping("/api/app")
 @RequiredArgsConstructor
 public class AppActivationController {
 
