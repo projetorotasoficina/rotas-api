@@ -28,8 +28,8 @@ public class CodigoAtivacaoServiceImpl
 
     private final CodigoAtivacaoRepository repository;
 
-    private static final String CARACTERES = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    private static final int TAMANHO_CODIGO = 24;
+    private static final String CARACTERES = "0123456789";  // ✅ Apenas números
+    private static final int TAMANHO_CODIGO = 6;
     private static final SecureRandom random = new SecureRandom();
 
     @Override

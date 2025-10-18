@@ -27,7 +27,7 @@ public class CodigoAtivacao extends BaseEntity {
     /**
      * Código único de ativação (24 caracteres alfanuméricos).
      */
-    @Column(nullable = false, unique = true, length = 24)
+    @Column(nullable = false, unique = true, length = 6)
     private String codigo;
 
     /**
