@@ -1,20 +1,26 @@
 package utfpr.edu.br.coleta.trajeto.pontotrajeto;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import utfpr.edu.br.coleta.generics.CrudServiceImpl;
+import utfpr.edu.br.coleta.trajeto.Trajeto;
 import utfpr.edu.br.coleta.trajeto.TrajetoRepository;
+import utfpr.edu.br.coleta.trajeto.pontotrajeto.dto.PontoTrajetoBatchResponseDTO;
 import utfpr.edu.br.coleta.trajeto.pontotrajeto.dto.PontoTrajetoCreateDTO;
 import utfpr.edu.br.coleta.trajeto.pontotrajeto.dto.PontoTrajetoDTO;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PontoTrajetoServiceImpl extends CrudServiceImpl<PontoTrajeto, Long> implements IPontoTrajetoService {
 
     private final PontoTrajetoRepository repository;
@@ -51,6 +57,97 @@ public class PontoTrajetoServiceImpl extends CrudServiceImpl<PontoTrajeto, Long>
         return repository.findByTrajetoId(trajetoId).stream()
                 .map(this::convertToDTO)
                 .toList();
+    }
+
+    @Override
+    @Transactional
+    public PontoTrajetoBatchResponseDTO registrarPontosLote(List<PontoTrajetoCreateDTO> pontos) {
+        PontoTrajetoBatchResponseDTO response = new PontoTrajetoBatchResponseDTO();
+        response.setTotalRecebidos(pontos.size());
+
+        log.info("Iniciando processamento de lote com {} pontos", pontos.size());
+
+        for (int i = 0; i < pontos.size(); i++) {
+            PontoTrajetoCreateDTO dto = pontos.get(i);
+            try {
+                PontoTrajetoDTO pontoSalvo = registrarPonto(dto);
+                response.adicionarPontoSalvo(pontoSalvo);
+            } catch (Exception e) {
+                log.error("Erro ao processar ponto no índice {}: {}", i, e.getMessage());
+                response.adicionarErro(i, dto, e.getMessage());
+            }
+        }
+
+        // Definir mensagem de resumo
+        if (response.todosSalvos()) {
+            response.setMensagem(String.format("Todos os %d pontos foram salvos com sucesso.", response.getTotalSalvos()));
+        } else if (response.getTotalSalvos() > 0) {
+            response.setMensagem(String.format("%d de %d pontos salvos. %d erros.", 
+                response.getTotalSalvos(), response.getTotalRecebidos(), response.getTotalErros()));
+        } else {
+            response.setMensagem("Nenhum ponto foi salvo. Verifique os erros.");
+        }
+
+        log.info("Processamento concluído: {} salvos, {} erros", response.getTotalSalvos(), response.getTotalErros());
+
+        return response;
+    }
+
+    @Override
+    @Transactional
+    public PontoTrajetoBatchResponseDTO registrarPontosLoteAtomico(List<PontoTrajetoCreateDTO> pontos) {
+        PontoTrajetoBatchResponseDTO response = new PontoTrajetoBatchResponseDTO();
+        response.setTotalRecebidos(pontos.size());
+
+        log.info("Iniciando processamento ATÔMICO de lote com {} pontos", pontos.size());
+
+        try {
+            // Validar todos os trajetos antes de salvar
+            for (PontoTrajetoCreateDTO dto : pontos) {
+                if (!trajetoRepository.existsById(dto.getTrajetoId())) {
+                    throw new RuntimeException("Trajeto ID " + dto.getTrajetoId() + " não encontrado");
+                }
+            }
+
+            // Salvar todos os pontos
+            List<PontoTrajeto> pontosParaSalvar = new ArrayList<>();
+            for (PontoTrajetoCreateDTO dto : pontos) {
+                Point point = geometryFactory.createPoint(
+                    new org.locationtech.jts.geom.Coordinate(dto.getLongitude(), dto.getLatitude())
+                );
+
+                Trajeto trajeto = trajetoRepository.findById(dto.getTrajetoId())
+                    .orElseThrow(() -> new RuntimeException("Trajeto não encontrado"));
+
+                PontoTrajeto ponto = new PontoTrajeto();
+                ponto.setTrajeto(trajeto);
+                ponto.setLocalizacao(point);
+                ponto.setHorario(dto.getHorario());
+                ponto.setObservacao(dto.getObservacao());
+
+                pontosParaSalvar.add(ponto);
+            }
+
+            // Salvar em lote
+            List<PontoTrajeto> pontosSalvos = repository.saveAll(pontosParaSalvar);
+
+            // Converter para DTO
+            for (PontoTrajeto ponto : pontosSalvos) {
+                response.adicionarPontoSalvo(convertToDTO(ponto));
+            }
+
+            response.setMensagem(String.format("Todos os %d pontos foram salvos com sucesso (transação atômica).", 
+                response.getTotalSalvos()));
+
+            log.info("Processamento atômico concluído: {} pontos salvos", response.getTotalSalvos());
+
+        } catch (Exception e) {
+            log.error("Erro no processamento atômico: {}", e.getMessage());
+            response.setMensagem("Erro no processamento: " + e.getMessage() + ". Nenhum ponto foi salvo (rollback).");
+            throw e; // Rollback da transação
+        }
+
+        return response;
     }
 
     private PontoTrajetoDTO convertToDTO(PontoTrajeto ponto) {
