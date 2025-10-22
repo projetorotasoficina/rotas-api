@@ -40,7 +40,7 @@ public class AppTokenFilter extends OncePerRequestFilter {
     // Endpoints que o app Android pode acessar
     private static final List<EndpointPermitido> ENDPOINTS_PERMITIDOS = List.of(
         new EndpointPermitido("GET", "/api/motoristas"),
-        new EndpointPermitido("GET", "/api/rotas"),
+        new EndpointPermitido("GET", "/api/rota"),
         new EndpointPermitido("GET", "/api/caminhoes"),
         new EndpointPermitido("POST", "/api/trajetos"),
         new EndpointPermitido("POST", "/api/incidentes")
