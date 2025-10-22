@@ -5,12 +5,10 @@ import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import utfpr.edu.br.coleta.caminhao.enums.TipoVeiculo;
 import utfpr.edu.br.coleta.generics.BaseEntity;
 import utfpr.edu.br.coleta.tipocoleta.TipoColeta;
 import utfpr.edu.br.coleta.tiporesiduo.TipoResiduo;
-
-
-import java.util.List;
 
 /**
  * Entidade que representa um Caminhão no sistema de coleta.
@@ -51,6 +49,12 @@ public class Caminhao extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "residuo_id", nullable = false)
     private TipoResiduo residuo;
+
+    /** Tipo de veículo (categoria de caminhaõ) que determina a CNH mínima exigida. */
+    @NotNull(message = "O tipo de veículo é obrigatório.")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_veiculo", nullable = false, length = 20)
+    private TipoVeiculo tipoVeiculo;
 
     /** Define se o caminhão está ativo no sistema. */
     @NotNull(message = "O campo ativo é obrigatório.")

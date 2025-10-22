@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import utfpr.edu.br.coleta.generics.BaseEntity;
+import utfpr.edu.br.coleta.motorista.enums.CategoriaCNH;
 
 import java.time.LocalDate;
 
@@ -36,9 +37,9 @@ public class Motorista extends BaseEntity {
     private String cpf;
 
     /** Categoria da CNH do motorista (A, B, C, D ou E). Opcional. */
-    @Pattern(regexp = "A|B|C|D|E|AB|AC|AD|AE", message = "Categoria da CNH inválida.")
+    @Enumerated(EnumType.STRING)
     @Column(name = "cnh_categoria", length = 2)
-    private String cnhCategoria;
+    private CategoriaCNH cnhCategoria;
 
     /** Data de validade da CNH. Deve ser futura. Opcional. */
     @Future(message = "A validade da CNH deve ser uma data futura.")
