@@ -1,8 +1,9 @@
-package utfpr.edu.br.coleta.rota;
+package utfpr.edu.br.coleta.rota.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.Data;
+
 import java.util.List;
 
 /**
@@ -32,15 +33,13 @@ public class RotaDTO {
     @NotNull(message = "O tipo de coleta é obrigatório.")
     private Long tipoColetaId;
 
-    /** Lista de dias da semana em que a rota deve ser realizada. */
-    @Schema(description = "Lista de dias da semana em que a rota deve ser realizada", 
-            example = "[SEGUNDA, QUARTA, SEXTA]")
-    private List<DiaSemana> diasSemana;
+    /** Frequências da rota: lista de dias da semana com seus respectivos períodos. */
+    @Schema(description = "Frequências da rota: lista de dias da semana com seus respectivos períodos",
+            example = "[{\"diaSemana\": \"SEGUNDA\", \"periodo\": \"MANHA\"}, {\"diaSemana\": \"QUARTA\", \"periodo\": \"TARDE\"}]")
+    private List<FrequenciaRotaDTO> frequencias;
 
-    /** Período do dia em que a rota deve ser realizada. */
-    @Schema(description = "Período do dia em que a rota deve ser realizada", 
-            example = "MANHA", 
-            allowableValues = {"MANHA", "TARDE", "NOITE"})
-    private Periodo periodo;
+    /** Área geográfica (polígono) no formato GeoJSON. */
+    @Schema(description = "Área geográfica (polígono) que representa a região de cobertura da rota, no formato GeoJSON")
+    private PolygonGeoJsonDTO areaGeografica;
 
 }

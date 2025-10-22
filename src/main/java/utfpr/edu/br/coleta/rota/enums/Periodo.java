@@ -1,4 +1,4 @@
-package utfpr.edu.br.coleta.rota;
+package utfpr.edu.br.coleta.rota.enums;
 
 /**
  * Enum que representa os períodos do dia em que uma rota pode ser realizada.
