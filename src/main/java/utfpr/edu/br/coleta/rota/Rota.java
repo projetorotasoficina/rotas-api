@@ -8,6 +8,7 @@ import lombok.Setter;
 import utfpr.edu.br.coleta.generics.BaseEntity;
 import utfpr.edu.br.coleta.tipocoleta.TipoColeta;
 import utfpr.edu.br.coleta.tiporesiduo.TipoResiduo;
+import java.util.List;
 
 /**
  * Entidade que representa uma Rota no sistema de coleta.
@@ -47,4 +48,16 @@ public class Rota extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "tipo_coleta_id", nullable = false)
     private TipoColeta tipoColeta;
+
+    /** Lista de dias da semana em que a rota deve ser realizada. */
+    @ElementCollection(targetClass = DiaSemana.class)
+    @CollectionTable(name = "tb_rota_dias_semana", joinColumns = @JoinColumn(name = "rota_id"))
+    @Column(name = "dia_semana")
+    @Enumerated(EnumType.STRING)
+    private List<DiaSemana> diasSemana;
+
+    /** Período do dia em que a rota deve ser realizada. */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "periodo")
+    private Periodo periodo;
 }
