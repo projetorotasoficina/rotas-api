@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import utfpr.edu.br.coleta.generics.BaseEntity;
+import utfpr.edu.br.coleta.rota.enums.DiaSemana;
+import utfpr.edu.br.coleta.rota.enums.Periodo;
 
 /**
  * Entidade que representa a frequência de uma rota,
