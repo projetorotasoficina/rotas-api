@@ -10,6 +10,17 @@ import utfpr.edu.br.coleta.generics.CrudController;
 import utfpr.edu.br.coleta.rota.dto.RotaDTO;
 import utfpr.edu.br.coleta.tipocoleta.TipoColetaService;
 import utfpr.edu.br.coleta.tiporesiduo.TipoResiduoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import utfpr.edu.br.coleta.rota.dto.AreasNaoPercorridasDTO;
 
 /**
  * Controller responsável por expor os endpoints REST para operações de CRUD de Rota.
@@ -21,6 +32,7 @@ import utfpr.edu.br.coleta.tiporesiduo.TipoResiduoService;
  */
 @RestController
 @RequestMapping("/rota")
+@Slf4j
 public class RotaController extends CrudController<Rota, RotaDTO> {
 
     private final RotaService service;
@@ -99,6 +111,122 @@ public class RotaController extends CrudController<Rota, RotaDTO> {
             return ResponseEntity.ok(rotaMapper.toDTO(rota));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+    /**
+     * Calcula e retorna as áreas da rota planejada que não foram percorridas pelos trajetos.
+     *
+     * Este endpoint compara a área geográfica planejada (Polygon) da rota com os trajetos
+     * realizados (LineString), aplicando um buffer configurável ao redor dos trajetos para
+     * considerar a largura de cobertura da coleta.
+     *
+     * @param id ID da rota a ser analisada
+     * @param bufferMetros Raio do buffer em metros aplicado ao redor do trajeto (opcional, padrão: 20m)
+     * @return DTO com áreas não cobertas em formato GeoJSON e estatísticas de cobertura
+     */
+    @Operation(
+            summary = "Obter áreas não percorridas da rota",
+            description = "Calcula as áreas da rota planejada que não foram cobertas pelos trajetos realizados. " +
+                    "Retorna geometria em formato GeoJSON e estatísticas detalhadas de cobertura."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Áreas não percorridas calculadas com sucesso",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = AreasNaoPercorridasDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Rota não encontrada",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Rota não possui área geográfica definida",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Erro interno ao processar áreas não percorridas",
+                    content = @Content
+            )
+    })
+    @GetMapping("/{id}/nao-percorridas")
+    public ResponseEntity<AreasNaoPercorridasDTO> obterAreasNaoPercorridas(
+            @Parameter(description = "ID da rota", required = true)
+            @PathVariable Long id,
+
+            @Parameter(description = "Raio do buffer em metros aplicado ao redor do trajeto (padrão: 20m)")
+            @RequestParam(required = false, defaultValue = "20.0") Double bufferMetros
+    ) {
+        log.info("GET /api/rotas/{}/nao-percorridas - buffer: {}m", id, bufferMetros);
+
+        try {
+            AreasNaoPercorridasDTO resultado = service.calcularAreasNaoPercorridas(id, bufferMetros);
+
+            log.info("Áreas não percorridas calculadas com sucesso para rota ID: {} - Cobertura: {}%",
+                    id, resultado.getEstatisticas().getPercentualCobertura());
+
+            return ResponseEntity.ok(resultado);
+
+        } catch (RotaService.RotaNaoEncontradaException e) {
+            log.warn("Rota não encontrada: {}", e.getMessage());
+            return ResponseEntity.notFound().build();
+
+        } catch (RotaService.AreaPlanejadaNaoDefinidaException e) {
+            log.warn("Área geográfica não definida: {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
+
+        } catch (RotaService.ErroProcessamentoGeoespacialException e) {
+            log.error("Erro ao processar áreas não percorridas para rota ID: {}", id, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+
+        } catch (Exception e) {
+            log.error("Erro inesperado ao processar áreas não percorridas para rota ID: {}", id, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    /**
+     * Endpoint alternativo que retorna apenas as estatísticas de cobertura, sem a geometria.
+     * Útil para dashboards e relatórios que não precisam renderizar o mapa.
+     *
+     * @param id ID da rota
+     * @param bufferMetros Raio do buffer em metros (opcional, padrão: 20m)
+     * @return Estatísticas de cobertura
+     */
+    @Operation(
+            summary = "Obter estatísticas de cobertura da rota",
+            description = "Retorna apenas as estatísticas de cobertura da rota, sem a geometria das áreas não percorridas."
+    )
+    @GetMapping("/{id}/estatisticas-cobertura")
+    public ResponseEntity<AreasNaoPercorridasDTO.EstatisticasCobertura> obterEstatisticasCobertura(
+            @Parameter(description = "ID da rota", required = true)
+            @PathVariable Long id,
+
+            @Parameter(description = "Raio do buffer em metros (padrão: 20m)")
+            @RequestParam(required = false, defaultValue = "20.0") Double bufferMetros
+    ) {
+        log.info("GET /api/rotas/{}/estatisticas-cobertura - buffer: {}m", id, bufferMetros);
+
+        try {
+            AreasNaoPercorridasDTO resultado = service.calcularAreasNaoPercorridas(id, bufferMetros);
+            return ResponseEntity.ok(resultado.getEstatisticas());
+
+        } catch (RotaService.RotaNaoEncontradaException e) {
+            log.warn("Rota não encontrada: {}", e.getMessage());
+            return ResponseEntity.notFound().build();
+
+        } catch (RotaService.AreaPlanejadaNaoDefinidaException e) {
+            log.warn("Área geográfica não definida: {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
+
+        } catch (Exception e) {
+            log.error("Erro ao obter estatísticas de cobertura para rota ID: {}", id, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }
