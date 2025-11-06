@@ -8,6 +8,8 @@ import lombok.Setter;
 import utfpr.edu.br.coleta.generics.BaseEntity;
 import utfpr.edu.br.coleta.tipocoleta.TipoColeta;
 import utfpr.edu.br.coleta.tiporesiduo.TipoResiduo;
+import org.locationtech.jts.geom.Polygon;
+import java.util.List;
 
 /**
  * Entidade que representa uma Rota no sistema de coleta.
@@ -47,4 +49,12 @@ public class Rota extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "tipo_coleta_id", nullable = false)
     private TipoColeta tipoColeta;
+
+    /** Frequências da rota: associa cada dia da semana a um período específico. */
+    @OneToMany(mappedBy = "rota", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FrequenciaRota> frequencias = new java.util.ArrayList<>();
+
+    /** Área geográfica (polígono) que representa a região de cobertura da rota. */
+    @Column(name = "area_geografica", columnDefinition = "geometry(Polygon, 4326)")
+    private Polygon areaGeografica;
 }

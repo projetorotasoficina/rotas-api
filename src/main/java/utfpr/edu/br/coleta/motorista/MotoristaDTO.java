@@ -1,7 +1,9 @@
 package utfpr.edu.br.coleta.motorista;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import utfpr.edu.br.coleta.motorista.enums.CategoriaCNH;
 
 import java.time.LocalDate;
 
@@ -26,8 +28,10 @@ public class MotoristaDTO {
     private String cpf;
 
     /** Categoria da CNH do motorista (A, B, C, D ou E). Opcional. */
-    @Pattern(regexp = "A|B|C|D|E|AB|AC|AD|AE", message = "Categoria da CNH inválida.")
-    private String cnhCategoria;
+    @Schema(description = "Categoria da CNH do motorista",
+            example = "C",
+            allowableValues = {"A", "B", "C", "D", "E", "AB", "AC", "AD", "AE"})
+    private CategoriaCNH cnhCategoria;
 
     /** Data de validade da CNH. Deve ser futura. Opcional. */
     @Future(message = "A validade da CNH deve ser uma data futura.")
