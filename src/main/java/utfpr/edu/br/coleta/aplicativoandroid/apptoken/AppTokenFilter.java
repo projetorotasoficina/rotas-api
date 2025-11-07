@@ -43,6 +43,7 @@ public class AppTokenFilter extends OncePerRequestFilter {
         new EndpointPermitido("GET", "/api/rota"),
         new EndpointPermitido("GET", "/api/caminhoes"),
         new EndpointPermitido("POST", "/api/trajetos"),
+        new EndpointPermitido("PUT",  "/api/trajetos"),   
         new EndpointPermitido("POST", "/api/incidentes"),
         new EndpointPermitido("POST", "/api/pontos-trajeto")     
     );
