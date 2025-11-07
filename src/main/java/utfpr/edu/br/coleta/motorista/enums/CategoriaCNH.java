@@ -83,14 +83,13 @@ public enum CategoriaCNH {
 
         // Categoria E permite dirigir B, C, D e E
         if (this == E || this == AE) {
-            return categoria == B || categoria == C || categoria == D || categoria == E ||
-                   categoria == AB || categoria == AC || categoria == AD || categoria == AE;
+            return categoria == B || categoria == C || categoria == D || categoria == E || categoria == AB || categoria == AC || categoria == AD || categoria == AE;
         }
 
         // Categoria D permite dirigir B e D
         if (this == D || this == AD) {
-            return categoria == B || categoria == D || categoria == AB || categoria == AD;
-        }
+            return categoria == B || categoria == C || categoria == D ||  categoria == AB || categoria == AC || categoria == AD;
+}
 
         // Categoria C permite dirigir B e C
         if (this == C || this == AC) {
