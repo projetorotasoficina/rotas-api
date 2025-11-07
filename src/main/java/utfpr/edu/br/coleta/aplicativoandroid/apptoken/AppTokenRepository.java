@@ -1,5 +1,7 @@
 package utfpr.edu.br.coleta.aplicativoandroid.apptoken;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -39,9 +41,18 @@ public interface AppTokenRepository extends JpaRepository<AppToken, Long> {
 
     /**
      * Lista todos os tokens inativos.
-     * 
+     *
      * @return lista de tokens inativos
      */
     List<AppToken> findByAtivoFalse();
+
+    /**
+     * Busca tokens que contenham o deviceId informado (busca parcial).
+     *
+     * @param deviceId termo de busca
+     * @param pageable informações de paginação
+     * @return página de tokens que correspondem à busca
+     */
+    Page<AppToken> findByDeviceIdContaining(String deviceId, Pageable pageable);
 }
 
