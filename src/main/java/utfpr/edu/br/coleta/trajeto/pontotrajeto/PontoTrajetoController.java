@@ -19,7 +19,7 @@ import utfpr.edu.br.coleta.trajeto.pontotrajeto.dto.PontoTrajetoDTO;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/pontos-trajeto")
+@RequestMapping("/pontos-trajeto")
 public class PontoTrajetoController extends CrudController<PontoTrajeto, PontoTrajetoDTO> {
 
     private final IPontoTrajetoService service;
