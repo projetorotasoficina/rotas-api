@@ -1,6 +1,8 @@
 package utfpr.edu.br.coleta.aplicativoandroid.codigoativacao;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +37,22 @@ public class CodigoAtivacaoServiceImpl
     @Override
     protected JpaRepository<CodigoAtivacao, Long> getRepository() {
         return repository;
+    }
+
+    /**
+     * Retorna uma página de códigos de ativação filtrados por busca textual.
+     * Se search for null ou vazio, retorna todos os códigos.
+     *
+     * @param pageable objeto com paginação e ordenação
+     * @param search termo de busca (opcional)
+     * @return página de códigos filtrados
+     */
+    @Override
+    public Page<CodigoAtivacao> findAll(Pageable pageable, String search) {
+        if (search == null || search.trim().isEmpty()) {
+            return findAll(pageable);
+        }
+        return repository.findByCodigoContaining(search, pageable);
     }
 
     /**
