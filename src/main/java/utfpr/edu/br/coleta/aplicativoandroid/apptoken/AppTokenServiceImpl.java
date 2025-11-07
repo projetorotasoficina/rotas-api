@@ -2,6 +2,8 @@ package utfpr.edu.br.coleta.aplicativoandroid.apptoken;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +30,22 @@ public class AppTokenServiceImpl extends CrudServiceImpl<AppToken, Long>
     @Override
     protected JpaRepository<AppToken, Long> getRepository() {
         return repository;
+    }
+
+    /**
+     * Retorna uma página de tokens filtrados por busca textual no deviceId.
+     * Se search for null ou vazio, retorna todos os tokens.
+     *
+     * @param pageable objeto com paginação e ordenação
+     * @param search termo de busca (opcional)
+     * @return página de tokens filtrados
+     */
+    @Override
+    public Page<AppToken> findAll(Pageable pageable, String search) {
+        if (search == null || search.trim().isEmpty()) {
+            return findAll(pageable);
+        }
+        return repository.findByDeviceIdContaining(search, pageable);
     }
 
     @Override
