@@ -1,4 +1,4 @@
-package utfpr.edu.br.coleta.usuario;
+package utfpr.edu.br.coleta.usuario.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
