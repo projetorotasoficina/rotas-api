@@ -115,6 +115,28 @@ public class RotaController extends CrudController<Rota, RotaDTO> {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @Override
+    @GetMapping("page")
+    public ResponseEntity<org.springframework.data.domain.Page<RotaDTO>> findAll(
+            @RequestParam int page,
+            @RequestParam int size,
+            @RequestParam(required = false) String order,
+            @RequestParam(required = false) Boolean asc,
+            @RequestParam(required = false) String search) {
+
+        org.springframework.data.domain.PageRequest pageRequest = org.springframework.data.domain.PageRequest.of(page, size);
+        if (order != null && asc != null) {
+            pageRequest = org.springframework.data.domain.PageRequest.of(page, size,
+                asc ? org.springframework.data.domain.Sort.Direction.ASC : org.springframework.data.domain.Sort.Direction.DESC,
+                order);
+        }
+
+        org.springframework.data.domain.Page<Rota> entities = service.findAll(pageRequest, search);
+        org.springframework.data.domain.Page<RotaDTO> dtos = entities.map(rotaMapper::toDTO);
+
+        return ResponseEntity.ok(dtos);
+    }
     /**
      * Calcula e retorna as áreas da rota planejada que não foram percorridas pelos trajetos.
      *
