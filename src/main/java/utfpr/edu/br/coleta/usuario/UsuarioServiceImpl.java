@@ -12,28 +12,22 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import utfpr.edu.br.coleta.generics.CrudServiceImpl;
 import utfpr.edu.br.coleta.usuario.dto.MoradorLogadoDTO;
+import utfpr.edu.br.coleta.usuario.dto.MoradorUpdateDTO;
+
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class UsuarioServiceImpl extends CrudServiceImpl<Usuario, Long>
-    implements IUsuarioService, UserDetailsService {
+        implements IUsuarioService, UserDetailsService {
 
   private final UsuarioRepository usuarioRepository;
 
-  /**
-   * Cria uma instância do serviço de usuário utilizando o repositório fornecido.
-   *
-   * @param usuarioRepository repositório de usuários utilizado para operações de persistência
-   */
   public UsuarioServiceImpl(UsuarioRepository usuarioRepository) {
-
     this.usuarioRepository = usuarioRepository;
   }
 
-  /**
-   * Fornece o repositório JPA utilizado para operações CRUD da entidade Usuario.
-   *
-   * @return o JpaRepository específico para Usuario
-   */
   @Override
   protected JpaRepository<Usuario, Long> getRepository() {
     return usuarioRepository;
@@ -41,13 +35,7 @@ public class UsuarioServiceImpl extends CrudServiceImpl<Usuario, Long>
 
   private static final String ROLE_SERVIDOR = "ROLE_SERVIDOR";
 
-  /**
-   * Obtém o usuário atualmente autenticado no contexto de segurança.
-   *
-   * @return o usuário autenticado
-   * @throws IllegalStateException se não houver autenticação ativa ou se o principal não for uma
-   *     instância de Usuario
-   */
+  /** Usuário autenticado */
   public Usuario obterUsuarioLogado() {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     if (auth == null || !auth.isAuthenticated()) {
@@ -60,33 +48,21 @@ public class UsuarioServiceImpl extends CrudServiceImpl<Usuario, Long>
     return (Usuario) principal;
   }
 
-
-
-  /**
-   * Carrega os detalhes do usuário baseado no email fornecido.
-   *
-   * @param email o email do usuário
-   * @return UserDetails do usuário encontrado
-   * @throws UsernameNotFoundException se o usuário não for encontrado
-   */
+  /** Spring Security: carrega por e-mail */
   @Override
   public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
     return usuarioRepository
-        .findByEmail(email)
-        .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + email));
+            .findByEmail(email)
+            .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + email));
   }
 
-  /**
-   * Ativa um usuário após validação bem-sucedida do código OTP.
-   *
-   * @param email o email do usuário a ser ativado
-   */
+  /** Ativa usuário após OTP */
   @Transactional
   public void ativarUsuario(String email) {
     Usuario usuario =
-        usuarioRepository
-            .findByEmail(email)
-            .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + email));
+            usuarioRepository
+                    .findByEmail(email)
+                    .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + email));
 
     usuario.setAtivo(true);
     usuarioRepository.save(usuario);
@@ -100,26 +76,20 @@ public class UsuarioServiceImpl extends CrudServiceImpl<Usuario, Long>
     return usuarioRepository.findByNomeContainingIgnoreCaseOrEmailContainingIgnoreCase(search, search, pageable);
   }
 
-  /**
-   * Cadastra um novo morador no sistema com role ROLE_MORADOR.
-   *
-   * @param cadastroDTO dados do morador a ser cadastrado
-   * @return usuário cadastrado
-   * @throws IllegalArgumentException se já existir usuário com o mesmo email ou CPF
-   */
+  /** Cadastro público de morador */
   @Transactional
   public Usuario cadastrarMorador(utfpr.edu.br.coleta.usuario.dto.MoradorCadastroDTO cadastroDTO) {
-    // Verifica se já existe usuário com o mesmo email
+    // e-mail único
     if (usuarioRepository.findByEmail(cadastroDTO.getEmail()).isPresent()) {
       throw new IllegalArgumentException("Já existe um usuário cadastrado com este e-mail.");
     }
-
-    // Verifica se já existe usuário com o mesmo CPF
-    if (usuarioRepository.findByCpf(cadastroDTO.getCpf()).isPresent()) {
-      throw new IllegalArgumentException("Já existe um usuário cadastrado com este CPF.");
+    // cpf único (se informado)
+    if (cadastroDTO.getCpf() != null && !cadastroDTO.getCpf().isBlank()) {
+      if (usuarioRepository.findByCpf(cadastroDTO.getCpf()).isPresent()) {
+        throw new IllegalArgumentException("Já existe um usuário cadastrado com este CPF.");
+      }
     }
 
-    // Cria novo usuário com role MORADOR
     Usuario usuario = new Usuario();
     usuario.setNome(cadastroDTO.getNome());
     usuario.setEmail(cadastroDTO.getEmail());
@@ -128,20 +98,19 @@ public class UsuarioServiceImpl extends CrudServiceImpl<Usuario, Long>
     usuario.setEndereco(cadastroDTO.getEndereco());
     usuario.setNumero(cadastroDTO.getNumero());
     usuario.setBairro(cadastroDTO.getBairro());
-    usuario.setCep(cadastroDTO.getCep());
+    usuario.setCep(normalizaCEP(cadastroDTO.getCep()));
     usuario.setLatitude(cadastroDTO.getLatitude());
     usuario.setLongitude(cadastroDTO.getLongitude());
     usuario.setAtivo(true);
 
-    // Define role MORADOR
-    java.util.Set<utfpr.edu.br.coleta.usuario.role.Role> roles = new java.util.HashSet<>();
+    Set<utfpr.edu.br.coleta.usuario.role.Role> roles = new HashSet<>();
     roles.add(utfpr.edu.br.coleta.usuario.role.Role.ROLE_MORADOR);
     usuario.setRoles(roles);
 
-    // Salva no banco
     return usuarioRepository.save(usuario);
   }
 
+  /** DTO completo do morador logado (leitura) */
   @Override
   public MoradorLogadoDTO obterMoradorLogadoCompleto() {
     Usuario u = obterUsuarioLogado();
@@ -160,5 +129,82 @@ public class UsuarioServiceImpl extends CrudServiceImpl<Usuario, Long>
             .latitude(u.getLatitude() == null ? null : u.getLatitude().doubleValue())
             .longitude(u.getLongitude() == null ? null : u.getLongitude().doubleValue())
             .build();
+  }
+
+  /** Atualiza dados do morador logado */
+  @Override
+  @Transactional
+  public MoradorLogadoDTO atualizarMoradorLogado(MoradorUpdateDTO dto) {
+    Usuario u = obterUsuarioLogado();
+
+    // Nome
+    if (dto.getNome() != null && !dto.getNome().isBlank()) {
+      u.setNome(dto.getNome().trim());
+    }
+    // Telefone
+    if (dto.getTelefone() != null) {
+      u.setTelefone(dto.getTelefone().trim());
+    }
+    // CPF (se mudou, valida unicidade)
+    if (dto.getCpf() != null && !dto.getCpf().isBlank()) {
+      String novoCpf = apenasDigitos(dto.getCpf());
+      if (!novoCpf.equals(u.getCpf())) {
+        Optional<Usuario> outro = usuarioRepository.findByCpf(novoCpf);
+        if (outro.isPresent() && !outro.get().getId().equals(u.getId())) {
+          throw new IllegalArgumentException("Já existe um usuário com este CPF.");
+        }
+        u.setCpf(novoCpf);
+      }
+    }
+    // E-mail (não alterar por padrão; se quiser permitir, descomente a validação abaixo)
+    /*
+    if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
+      String novoEmail = dto.getEmail().trim().toLowerCase();
+      if (!novoEmail.equalsIgnoreCase(u.getEmail())) {
+        Optional<Usuario> outroEmail = usuarioRepository.findByEmail(novoEmail);
+        if (outroEmail.isPresent() && !outroEmail.get().getId().equals(u.getId())) {
+          throw new IllegalArgumentException("Já existe um usuário com este e-mail.");
+        }
+        u.setEmail(novoEmail);
+      }
+    }
+    */
+
+    // Endereço
+    if (dto.getEndereco() != null) u.setEndereco(vazioParaNull(dto.getEndereco()));
+    if (dto.getNumero() != null)   u.setNumero(vazioParaNull(dto.getNumero()));
+    if (dto.getBairro() != null)   u.setBairro(vazioParaNull(dto.getBairro()));
+    if (dto.getCep() != null)      u.setCep(normalizaCEP(dto.getCep()));
+
+    // Coordenadas
+    if (dto.getLatitude() != null)  u.setLatitude(dto.getLatitude());
+    if (dto.getLongitude() != null) u.setLongitude(dto.getLongitude());
+
+    usuarioRepository.save(u);
+    return obterMoradorLogadoCompleto();
+  }
+
+  /** Exclui (hard delete) a conta do usuário logado */
+  @Override
+  @Transactional
+  public void excluirContaLogado() {
+    Usuario u = obterUsuarioLogado();
+    usuarioRepository.deleteById(u.getId());
+  }
+
+  /* ===================== utilitários ===================== */
+
+  private static String normalizaCEP(String cep) {
+    if (cep == null) return null;
+    String dig = apenasDigitos(cep);
+    return dig.length() == 8 ? dig : dig; // mantém só dígitos; regra extra se quiser.
+  }
+
+  private static String apenasDigitos(String s) {
+    return s == null ? null : s.replaceAll("\\D", "");
+  }
+
+  private static String vazioParaNull(String s) {
+    return (s == null || s.isBlank()) ? null : s.trim();
   }
 }

@@ -94,7 +94,12 @@ public class SecurityConfig {
                 // Página de erro
                 .requestMatchers("/error").permitAll()
 
-                // ✅ Endpoints de gerenciamento de códigos e tokens - apenas SUPER_ADMIN
+                    // *** ESPECÍFICO PARA MORADOR LOGADO (ATUALIZA/EXCLUI O PRÓPRIO PERFIL) ***
+                    .requestMatchers(HttpMethod.PUT, "/api/usuarios/meu-perfil").hasAuthority("ROLE_MORADOR")
+                    .requestMatchers(HttpMethod.DELETE, "/api/usuarios/meu-perfil").hasAuthority("ROLE_MORADOR")
+
+
+                    // ✅ Endpoints de gerenciamento de códigos e tokens - apenas SUPER_ADMIN
                 .requestMatchers("/api/codigosativacao/**").hasAuthority("ROLE_SUPER_ADMIN")
                 .requestMatchers("/api/apptokens/**").hasAuthority("ROLE_SUPER_ADMIN")
 
