@@ -78,7 +78,7 @@ public class SecurityConfig {
 
                 // ✅ Endpoint público de ativação Android
                 .requestMatchers("/api/app/activate").permitAll()
-                .requestMatchers("/api/utils").permitAll()
+                .requestMatchers("/api/utils/**").permitAll()
 
 
                 // Console H2 apenas em ambiente de teste
