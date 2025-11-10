@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import utfpr.edu.br.coleta.generics.CrudController;
 import utfpr.edu.br.coleta.generics.ICrudService;
+import utfpr.edu.br.coleta.usuario.dto.MoradorLogadoDTO;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -59,5 +60,10 @@ public class UsuarioController extends CrudController<Usuario, Usuario> {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @GetMapping("/meu-perfil/morador")
+    public ResponseEntity<MoradorLogadoDTO> getMeuPerfilCompleto() {
+        return ResponseEntity.ok(usuarioService.obterMoradorLogadoCompleto());
     }
 }

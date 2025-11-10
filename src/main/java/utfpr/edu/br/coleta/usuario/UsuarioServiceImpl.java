@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import utfpr.edu.br.coleta.generics.CrudServiceImpl;
+import utfpr.edu.br.coleta.usuario.dto.MoradorLogadoDTO;
 
 @Service
 public class UsuarioServiceImpl extends CrudServiceImpl<Usuario, Long>
@@ -139,5 +140,25 @@ public class UsuarioServiceImpl extends CrudServiceImpl<Usuario, Long>
 
     // Salva no banco
     return usuarioRepository.save(usuario);
+  }
+
+  @Override
+  public MoradorLogadoDTO obterMoradorLogadoCompleto() {
+    Usuario u = obterUsuarioLogado();
+
+    return MoradorLogadoDTO.builder()
+            .id(u.getId())
+            .nome(u.getNome())
+            .cpf(u.getCpf())
+            .email(u.getEmail())
+            .telefone(u.getTelefone())
+            .ativo(u.getAtivo())
+            .endereco(u.getEndereco())
+            .numero(u.getNumero())
+            .bairro(u.getBairro())
+            .cep(u.getCep())
+            .latitude(u.getLatitude() == null ? null : u.getLatitude().doubleValue())
+            .longitude(u.getLongitude() == null ? null : u.getLongitude().doubleValue())
+            .build();
   }
 }

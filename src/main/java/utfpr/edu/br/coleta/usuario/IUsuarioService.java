@@ -3,6 +3,7 @@ package utfpr.edu.br.coleta.usuario;
 
 import org.springframework.security.core.userdetails.UserDetailsService;
 import utfpr.edu.br.coleta.generics.ICrudService;
+import utfpr.edu.br.coleta.usuario.dto.MoradorLogadoDTO;
 
 public interface IUsuarioService extends ICrudService<Usuario, Long>, UserDetailsService {
   /**
@@ -26,4 +27,6 @@ public interface IUsuarioService extends ICrudService<Usuario, Long>, UserDetail
    * @return usuário cadastrado com role ROLE_MORADOR
    */
   Usuario cadastrarMorador(utfpr.edu.br.coleta.usuario.dto.MoradorCadastroDTO cadastroDTO);
+  MoradorLogadoDTO obterMoradorLogadoCompleto(); // novo
+
 }
