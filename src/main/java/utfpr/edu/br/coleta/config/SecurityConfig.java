@@ -96,7 +96,7 @@ public class SecurityConfig {
 
                     // *** ESPECÍFICO PARA MORADOR LOGADO (ATUALIZA/EXCLUI O PRÓPRIO PERFIL) ***
                     .requestMatchers(HttpMethod.PUT, "/api/usuarios/meu-perfil").authenticated()
-                    .requestMatchers(HttpMethod.DELETE, "/api/usuarios/meu-perfil").authenticated()
+                    .requestMatchers(HttpMethod.DELETE, "/api/usuarios/meu-perfil").hasAuthority("ROLE_MORADOR")
 
                     // ✅ Endpoints de gerenciamento de códigos e tokens - apenas SUPER_ADMIN
                 .requestMatchers("/api/codigosativacao/**").hasAuthority("ROLE_SUPER_ADMIN")
@@ -130,8 +130,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/api/tiporesiduo/**").hasAuthority("ROLE_SUPER_ADMIN")
 
                 // ✅ Endpoints de consulta para morador autenticado
-                .requestMatchers("/api/consulta/agenda-coleta").hasAuthority("ROLE_MORADOR")
-                .requestMatchers("/api/consulta/historico-coleta").hasAuthority("ROLE_MORADOR")
+                .requestMatchers("/api/consulta/agenda-coleta").authenticated()
+                .requestMatchers("/api/consulta/historico-coleta").authenticated()
 
                 // Operações de consulta (GET) - Qualquer usuário autenticado
                 .requestMatchers(HttpMethod.GET, "/api/usuarios/meu-perfil").authenticated()
