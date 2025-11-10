@@ -35,4 +35,29 @@ public class UsuarioController extends CrudController<Usuario, Usuario> {
     public ResponseEntity<Usuario> getMeuPerfil() {
         return ResponseEntity.ok(usuarioService.obterUsuarioLogado());
     }
+
+    /**
+     * Endpoint público para cadastro de novos moradores.
+     *
+     * @param cadastroDTO dados do morador a ser cadastrado
+     * @return usuário cadastrado com role ROLE_MORADOR
+     */
+    @io.swagger.v3.oas.annotations.Operation(
+        summary = "Cadastrar novo morador",
+        description = "Endpoint público para cadastro de novos moradores no sistema"
+    )
+    @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Morador cadastrado com sucesso"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Dados inválidos ou usuário já cadastrado")
+    })
+    @PostMapping("/morador")
+    public ResponseEntity<Usuario> cadastrarMorador(
+            @jakarta.validation.Valid @RequestBody utfpr.edu.br.coleta.usuario.dto.MoradorCadastroDTO cadastroDTO) {
+        try {
+            Usuario morador = usuarioService.cadastrarMorador(cadastroDTO);
+            return ResponseEntity.status(org.springframework.http.HttpStatus.CREATED).body(morador);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

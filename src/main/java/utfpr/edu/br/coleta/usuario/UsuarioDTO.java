@@ -37,4 +37,18 @@ public class UsuarioDTO {
     private Boolean ativo;
 
     private Set<Role> roles;
+
+    // Campos específicos para ROLE_MORADOR
+    private String endereco;
+
+    private String numero;
+
+    private String bairro;
+
+    @Pattern(regexp = "\\d{8}", message = "O CEP deve conter 8 dígitos numéricos.")
+    private String cep;
+
+    private Double latitude;
+
+    private Double longitude;
 }
