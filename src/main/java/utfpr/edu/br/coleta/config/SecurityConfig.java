@@ -69,6 +69,13 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/email/**").permitAll()
 
+                // ✅ Cadastro de morador - endpoint público
+                .requestMatchers("/api/usuarios/morador").permitAll()
+
+                // ✅ Consultas de coleta por coordenadas - endpoints públicos
+                .requestMatchers("/api/consulta/agenda-coleta/coordenadas").permitAll()
+                .requestMatchers("/api/consulta/historico-coleta/coordenadas").permitAll()
+
                 // ✅ Endpoint público de ativação Android
                 .requestMatchers("/api/app/activate").permitAll()
 
@@ -115,6 +122,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/api/caminhoes/**").hasAuthority("ROLE_SUPER_ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/tipocoleta/**").hasAuthority("ROLE_SUPER_ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/tiporesiduo/**").hasAuthority("ROLE_SUPER_ADMIN")
+
+                // ✅ Endpoints de consulta para morador autenticado
+                .requestMatchers("/api/consulta/agenda-coleta").hasAuthority("ROLE_MORADOR")
+                .requestMatchers("/api/consulta/historico-coleta").hasAuthority("ROLE_MORADOR")
 
                 // Operações de consulta (GET) - Qualquer usuário autenticado
                 .requestMatchers(HttpMethod.GET, "/api/usuarios/meu-perfil").authenticated()

@@ -58,6 +58,24 @@ public class Usuario extends BaseEntity implements UserDetails {
     @Column(nullable = false)
     private Boolean ativo;
 
+    // Campos específicos para ROLE_MORADOR
+    private String endereco;
+
+    private String numero;
+
+    private String bairro;
+
+    @Pattern(regexp = "\\d{8}", message = "O CEP deve conter 8 dígitos numéricos.")
+    @Column(length = 8)
+    private String cep;
+
+    @Column
+    private Double latitude;
+
+    @Column
+    private Double longitude;
+
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
             name = "tb_usuario_roles",
