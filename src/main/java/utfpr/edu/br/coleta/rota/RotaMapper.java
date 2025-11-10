@@ -32,30 +32,67 @@ public class RotaMapper {
      * Converte RotaDTO para entidade Rota.
      */
     public Rota toEntity(RotaDTO dto, TipoResiduo tipoResiduo, TipoColeta tipoColeta) {
-        Rota rota = new Rota();
+        return toEntity(dto, tipoResiduo, tipoColeta, null);
+    }
+
+    /**
+     * Converte RotaDTO para entidade Rota, atualizando uma entidade existente se fornecida.
+     */
+    public Rota toEntity(RotaDTO dto, TipoResiduo tipoResiduo, TipoColeta tipoColeta, Rota existingRota) {
+        Rota rota = existingRota != null ? existingRota : new Rota();
         rota.setId(dto.getId());
         rota.setNome(dto.getNome());
         rota.setAtivo(dto.getAtivo());
         rota.setObservacoes(dto.getObservacoes());
-        
+
         // Configurar relacionamentos
         rota.setTipoResiduo(tipoResiduo);
         rota.setTipoColeta(tipoColeta);
-        
-        // Converter frequências
-        if (dto.getFrequencias() != null && !dto.getFrequencias().isEmpty()) {
-            List<FrequenciaRota> frequencias = dto.getFrequencias().stream()
-                .map(freqDTO -> new FrequenciaRota(rota, freqDTO.getDiaSemana(), freqDTO.getPeriodo()))
-                .collect(Collectors.toList());
-            rota.setFrequencias(frequencias);
+
+        // Garantir que a lista de frequências existe
+        if (rota.getFrequencias() == null) {
+            rota.setFrequencias(new java.util.ArrayList<>());
         }
-        
+
+        // Atualizar frequências de forma inteligente
+        if (dto.getFrequencias() != null && !dto.getFrequencias().isEmpty()) {
+            // Criar um mapa das frequências do DTO por dia da semana
+            java.util.Map<utfpr.edu.br.coleta.rota.enums.DiaSemana, utfpr.edu.br.coleta.rota.enums.Periodo> dtoFrequenciasMap =
+                dto.getFrequencias().stream()
+                    .collect(Collectors.toMap(
+                        FrequenciaRotaDTO::getDiaSemana,
+                        FrequenciaRotaDTO::getPeriodo
+                    ));
+
+            // Remover frequências que não existem mais no DTO
+            rota.getFrequencias().removeIf(freq -> !dtoFrequenciasMap.containsKey(freq.getDiaSemana()));
+
+            // Atualizar frequências existentes ou adicionar novas
+            for (FrequenciaRotaDTO freqDTO : dto.getFrequencias()) {
+                FrequenciaRota existingFreq = rota.getFrequencias().stream()
+                    .filter(f -> f.getDiaSemana().equals(freqDTO.getDiaSemana()))
+                    .findFirst()
+                    .orElse(null);
+
+                if (existingFreq != null) {
+                    // Atualizar período da frequência existente
+                    existingFreq.setPeriodo(freqDTO.getPeriodo());
+                } else {
+                    // Adicionar nova frequência
+                    rota.getFrequencias().add(new FrequenciaRota(rota, freqDTO.getDiaSemana(), freqDTO.getPeriodo()));
+                }
+            }
+        } else {
+            // Se não houver frequências no DTO, limpar as existentes
+            rota.getFrequencias().clear();
+        }
+
         // Converter GeoJSON para Polygon JTS
         if (dto.getAreaGeografica() != null) {
             Polygon polygon = GeoJsonConverter.toJtsPolygon(dto.getAreaGeografica());
             rota.setAreaGeografica(polygon);
         }
-        
+
         return rota;
     }
 
