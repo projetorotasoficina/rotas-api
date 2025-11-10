@@ -2,6 +2,8 @@ package utfpr.edu.br.coleta.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springdoc.core.models.GroupedOpenApi;
@@ -22,6 +24,20 @@ public class OpenApiConfig {
   @Bean
   public OpenAPI customOpenAPI() {
     return new OpenAPI()
+        .info(new Info()
+            .title("Rotas API - Sistema de Controle de Coleta de Lixo")
+            .version("1.0")
+            .description("API REST para gerenciamento de rotas de coleta de lixo. "
+                + "Suporta gestão de usuários (Administradores, Motoristas e Moradores), "
+                + "caminhões, rotas, trajetos e consultas de agenda/histórico de coleta. "
+                + "\n\n**Roles disponíveis:**\n"
+                + "- `ROLE_SUPER_ADMIN`: Acesso total ao sistema\n"
+                + "- `ROLE_ADMIN_CONSULTA`: Acesso de consulta\n"
+                + "- `ROLE_MORADOR`: Acesso para moradores (consulta de coleta)\n"
+                + "- `ROLE_APP_ANDROID`: Acesso para aplicativo Android (motoristas)")
+            .contact(new Contact()
+                .name("Projeto Rotas Oficina")
+                .url("https://github.com/projetorotasoficina/rotas-api")))
         .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
         .components(
             new Components()
@@ -30,7 +46,8 @@ public class OpenApiConfig {
                     new SecurityScheme()
                         .type(SecurityScheme.Type.HTTP)
                         .scheme("bearer")
-                        .bearerFormat("JWT")));
+                        .bearerFormat("JWT")
+                        .description("Token JWT obtido através do endpoint de autenticação")));
   }
 
   /**

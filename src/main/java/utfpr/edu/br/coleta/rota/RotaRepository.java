@@ -34,6 +34,13 @@ public interface RotaRepository extends JpaRepository<Rota, Long> {
     boolean existsById(Long id);
 
     /**
+     * Busca todas as rotas ativas.
+     *
+     * @return lista de rotas ativas
+     */
+    java.util.List<Rota> findByAtivoTrue();
+
+    /**
      * Busca rotas por nome (case-insensitive).
      *
      * @param nome termo de busca

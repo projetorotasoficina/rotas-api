@@ -98,4 +98,46 @@ public class UsuarioServiceImpl extends CrudServiceImpl<Usuario, Long>
     }
     return usuarioRepository.findByNomeContainingIgnoreCaseOrEmailContainingIgnoreCase(search, search, pageable);
   }
+
+  /**
+   * Cadastra um novo morador no sistema com role ROLE_MORADOR.
+   *
+   * @param cadastroDTO dados do morador a ser cadastrado
+   * @return usuário cadastrado
+   * @throws IllegalArgumentException se já existir usuário com o mesmo email ou CPF
+   */
+  @Transactional
+  public Usuario cadastrarMorador(utfpr.edu.br.coleta.usuario.dto.MoradorCadastroDTO cadastroDTO) {
+    // Verifica se já existe usuário com o mesmo email
+    if (usuarioRepository.findByEmail(cadastroDTO.getEmail()).isPresent()) {
+      throw new IllegalArgumentException("Já existe um usuário cadastrado com este e-mail.");
+    }
+
+    // Verifica se já existe usuário com o mesmo CPF
+    if (usuarioRepository.findByCpf(cadastroDTO.getCpf()).isPresent()) {
+      throw new IllegalArgumentException("Já existe um usuário cadastrado com este CPF.");
+    }
+
+    // Cria novo usuário com role MORADOR
+    Usuario usuario = new Usuario();
+    usuario.setNome(cadastroDTO.getNome());
+    usuario.setEmail(cadastroDTO.getEmail());
+    usuario.setCpf(cadastroDTO.getCpf());
+    usuario.setTelefone(cadastroDTO.getTelefone());
+    usuario.setEndereco(cadastroDTO.getEndereco());
+    usuario.setNumero(cadastroDTO.getNumero());
+    usuario.setBairro(cadastroDTO.getBairro());
+    usuario.setCep(cadastroDTO.getCep());
+    usuario.setLatitude(cadastroDTO.getLatitude());
+    usuario.setLongitude(cadastroDTO.getLongitude());
+    usuario.setAtivo(true);
+
+    // Define role MORADOR
+    java.util.Set<utfpr.edu.br.coleta.usuario.role.Role> roles = new java.util.HashSet<>();
+    roles.add(utfpr.edu.br.coleta.usuario.role.Role.ROLE_MORADOR);
+    usuario.setRoles(roles);
+
+    // Salva no banco
+    return usuarioRepository.save(usuario);
+  }
 }

@@ -18,4 +18,12 @@ public interface IUsuarioService extends ICrudService<Usuario, Long>, UserDetail
    * @param email e-mail do usuário a ser ativado
    */
   void ativarUsuario(String email);
+
+  /**
+   * Cadastra um novo morador no sistema.
+   *
+   * @param cadastroDTO dados do morador a ser cadastrado
+   * @return usuário cadastrado com role ROLE_MORADOR
+   */
+  Usuario cadastrarMorador(utfpr.edu.br.coleta.usuario.dto.MoradorCadastroDTO cadastroDTO);
 }
