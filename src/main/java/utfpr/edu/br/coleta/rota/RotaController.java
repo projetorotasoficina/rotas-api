@@ -88,12 +88,14 @@ public class RotaController extends CrudController<Rota, RotaDTO> {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             }
 
+            Rota existingRota = service.findOne(id);
+
             var tipoResiduo = tipoResiduoService.findOne(dto.getTipoResiduoId());
             var tipoColeta = tipoColetaService.findOne(dto.getTipoColetaId());
-            
-            Rota rota = rotaMapper.toEntity(dto, tipoResiduo, tipoColeta);
+
+            Rota rota = rotaMapper.toEntity(dto, tipoResiduo, tipoColeta, existingRota);
             Rota updated = service.save(rota);
-            
+
             return ResponseEntity.ok(rotaMapper.toDTO(updated));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
