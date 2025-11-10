@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import utfpr.edu.br.coleta.generics.CrudController;
 import utfpr.edu.br.coleta.generics.ICrudService;
 import utfpr.edu.br.coleta.usuario.dto.MoradorLogadoDTO;
+import utfpr.edu.br.coleta.usuario.dto.MoradorUpdateDTO;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -65,5 +66,20 @@ public class UsuarioController extends CrudController<Usuario, Usuario> {
     @GetMapping("/meu-perfil/morador")
     public ResponseEntity<MoradorLogadoDTO> getMeuPerfilCompleto() {
         return ResponseEntity.ok(usuarioService.obterMoradorLogadoCompleto());
+    }
+
+    // NOVO: Atualizar dados do morador logado
+    @PutMapping("/meu-perfil")
+    public ResponseEntity<MoradorLogadoDTO> atualizarMeuPerfil(@RequestBody MoradorUpdateDTO dto) {
+        var atualizado = usuarioService.atualizarMoradorLogado(dto);
+        if (atualizado == null) return ResponseEntity.status(401).build();
+        return ResponseEntity.ok(atualizado);
+    }
+
+    // NOVO: Excluir conta do usuário logado
+    @DeleteMapping("/meu-perfil")
+    public ResponseEntity<Void> excluirMinhaConta() {
+        usuarioService.excluirContaLogado();
+        return ResponseEntity.noContent().build();
     }
 }
