@@ -40,11 +40,19 @@ public class PontoTrajetoServiceImpl extends CrudServiceImpl<PontoTrajeto, Long>
 
     @Override
     public PontoTrajetoDTO registrarPonto(PontoTrajetoCreateDTO dto) {
-        Point point = geometryFactory.createPoint(new org.locationtech.jts.geom.Coordinate(dto.getLongitude(), dto.getLatitude()));
 
+        // *** CRIA SEM ID PRA FORÇAR INSERT ***
         PontoTrajeto ponto = new PontoTrajeto();
+        ponto.setId(null);
+
+        // Coordenada JTS é (x=lon, y=lat)
+        Point point = geometryFactory.createPoint(
+                new org.locationtech.jts.geom.Coordinate(dto.getLongitude(), dto.getLatitude())
+        );
+
         ponto.setTrajeto(trajetoRepository.findById(dto.getTrajetoId())
                 .orElseThrow(() -> new RuntimeException("Trajeto não encontrado")));
+
         ponto.setLocalizacao(point);
         ponto.setHorario(dto.getHorario());
         ponto.setObservacao(dto.getObservacao());
@@ -78,12 +86,11 @@ public class PontoTrajetoServiceImpl extends CrudServiceImpl<PontoTrajeto, Long>
             }
         }
 
-        // Definir mensagem de resumo
         if (response.todosSalvos()) {
             response.setMensagem(String.format("Todos os %d pontos foram salvos com sucesso.", response.getTotalSalvos()));
         } else if (response.getTotalSalvos() > 0) {
-            response.setMensagem(String.format("%d de %d pontos salvos. %d erros.", 
-                response.getTotalSalvos(), response.getTotalRecebidos(), response.getTotalErros()));
+            response.setMensagem(String.format("%d de %d pontos salvos. %d erros.",
+                    response.getTotalSalvos(), response.getTotalRecebidos(), response.getTotalErros()));
         } else {
             response.setMensagem("Nenhum ponto foi salvo. Verifique os erros.");
         }
@@ -102,24 +109,23 @@ public class PontoTrajetoServiceImpl extends CrudServiceImpl<PontoTrajeto, Long>
         log.info("Iniciando processamento ATÔMICO de lote com {} pontos", pontos.size());
 
         try {
-            // Validar todos os trajetos antes de salvar
             for (PontoTrajetoCreateDTO dto : pontos) {
                 if (!trajetoRepository.existsById(dto.getTrajetoId())) {
                     throw new RuntimeException("Trajeto ID " + dto.getTrajetoId() + " não encontrado");
                 }
             }
 
-            // Salvar todos os pontos
             List<PontoTrajeto> pontosParaSalvar = new ArrayList<>();
             for (PontoTrajetoCreateDTO dto : pontos) {
                 Point point = geometryFactory.createPoint(
-                    new org.locationtech.jts.geom.Coordinate(dto.getLongitude(), dto.getLatitude())
+                        new org.locationtech.jts.geom.Coordinate(dto.getLongitude(), dto.getLatitude())
                 );
 
                 Trajeto trajeto = trajetoRepository.findById(dto.getTrajetoId())
-                    .orElseThrow(() -> new RuntimeException("Trajeto não encontrado"));
+                        .orElseThrow(() -> new RuntimeException("Trajeto não encontrado"));
 
                 PontoTrajeto ponto = new PontoTrajeto();
+                ponto.setId(null); // <--- MESMA CORREÇÃO AQUI
                 ponto.setTrajeto(trajeto);
                 ponto.setLocalizacao(point);
                 ponto.setHorario(dto.getHorario());
@@ -128,23 +134,21 @@ public class PontoTrajetoServiceImpl extends CrudServiceImpl<PontoTrajeto, Long>
                 pontosParaSalvar.add(ponto);
             }
 
-            // Salvar em lote
             List<PontoTrajeto> pontosSalvos = repository.saveAll(pontosParaSalvar);
 
-            // Converter para DTO
             for (PontoTrajeto ponto : pontosSalvos) {
                 response.adicionarPontoSalvo(convertToDTO(ponto));
             }
 
-            response.setMensagem(String.format("Todos os %d pontos foram salvos com sucesso (transação atômica).", 
-                response.getTotalSalvos()));
+            response.setMensagem(String.format("Todos os %d pontos foram salvos com sucesso (transação atômica).",
+                    response.getTotalSalvos()));
 
             log.info("Processamento atômico concluído: {} pontos salvos", response.getTotalSalvos());
 
         } catch (Exception e) {
             log.error("Erro no processamento atômico: {}", e.getMessage());
             response.setMensagem("Erro no processamento: " + e.getMessage() + ". Nenhum ponto foi salvo (rollback).");
-            throw e; // Rollback da transação
+            throw e;
         }
 
         return response;
