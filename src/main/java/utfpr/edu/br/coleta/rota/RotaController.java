@@ -117,6 +117,16 @@ public class RotaController extends CrudController<Rota, RotaDTO> {
     }
 
     @Override
+    @GetMapping
+    public ResponseEntity<java.util.List<RotaDTO>> findAll() {
+        java.util.List<Rota> entities = service.findAll();
+        java.util.List<RotaDTO> dtos = entities.stream()
+                .map(rotaMapper::toDTO)
+                .toList();
+        return ResponseEntity.ok(dtos);
+    }
+
+    @Override
     @GetMapping("page")
     public ResponseEntity<org.springframework.data.domain.Page<RotaDTO>> findAll(
             @RequestParam int page,
