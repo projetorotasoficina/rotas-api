@@ -52,3 +52,11 @@ management:
   endpoint:
     health:
       show-details: always
+# ============================
+# MINIO CONFIGURATION
+# ============================
+minio:
+  url: ${MINIO_URL:http://minio:9000}
+  access-key: ${MINIO_ACCESS_KEY:minioadmin}
+  secret-key: ${MINIO_SECRET_KEY:minioadmin}
+  bucket-name: ${MINIO_BUCKET_NAME:coleta-incidentes}
