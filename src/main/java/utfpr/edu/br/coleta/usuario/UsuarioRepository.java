@@ -3,6 +3,8 @@ package utfpr.edu.br.coleta.usuario;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import utfpr.edu.br.coleta.caminhao.Caminhao;
 
 import java.util.List;
 import java.util.Optional;
@@ -10,7 +12,7 @@ import java.util.Optional;
 /**
  * Repositório responsável por operações de persistência da entidade Usuário.
  */
-public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
+public interface UsuarioRepository extends JpaRepository<Usuario, Long>, JpaSpecificationExecutor<Usuario> {
 
     Optional<Usuario> findByCpf(String cpf);
 

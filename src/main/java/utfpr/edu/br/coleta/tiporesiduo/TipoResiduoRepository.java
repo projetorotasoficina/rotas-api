@@ -3,9 +3,12 @@ package utfpr.edu.br.coleta.tiporesiduo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import utfpr.edu.br.coleta.caminhao.Caminhao;
+
 import java.util.Optional;
 
-public interface TipoResiduoRepository extends JpaRepository<TipoResiduo, Long> {
+public interface TipoResiduoRepository extends JpaRepository<TipoResiduo, Long>, JpaSpecificationExecutor<TipoResiduo> {
 
     Optional<TipoResiduo> findByNome(String nome);
 

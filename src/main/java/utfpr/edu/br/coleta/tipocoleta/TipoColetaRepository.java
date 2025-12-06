@@ -3,6 +3,9 @@ package utfpr.edu.br.coleta.tipocoleta;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import utfpr.edu.br.coleta.caminhao.Caminhao;
+
 import java.util.Optional;
 
 /**
@@ -12,7 +15,7 @@ import java.util.Optional;
  *
  * Autor: Pedro Henrique Sauthier
  */
-public interface TipoColetaRepository extends JpaRepository<TipoColeta, Long> {
+public interface TipoColetaRepository extends JpaRepository<TipoColeta, Long> , JpaSpecificationExecutor<TipoColeta> {
 
     /**
      * Busca um tipo coleta pelo Id.

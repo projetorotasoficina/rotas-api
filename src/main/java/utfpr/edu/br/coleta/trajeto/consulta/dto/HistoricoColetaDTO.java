@@ -1,4 +1,4 @@
-package utfpr.edu.br.coleta.consulta.dto;
+package utfpr.edu.br.coleta.trajeto.consulta.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
