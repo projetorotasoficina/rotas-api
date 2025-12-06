@@ -60,12 +60,13 @@ public interface RotaRepository extends JpaRepository<Rota, Long> {
      */
     @Query(value = """
     SELECT ST_AsGeoJSON(
-        calcular_areas_nao_percorridas(:rotaId, :bufferMetros)
+        calcular_areas_nao_percorridas(:rotaId, :bufferMetros, :trajetoId)
     )::text as areas_nao_cobertas
     """, nativeQuery = true)
     Optional<String> calcularAreasNaoPercorridas(
             @Param("rotaId") Long rotaId,
-            @Param("bufferMetros") Double bufferMetros
+            @Param("bufferMetros") Double bufferMetros,
+            @Param("trajetoId") Long trajetoId
     );
 
     /**
@@ -76,11 +77,12 @@ public interface RotaRepository extends JpaRepository<Rota, Long> {
      * @return JSON com estatísticas de cobertura
      */
     @Query(value = """
-    SELECT obter_estatisticas_cobertura(:rotaId, :bufferMetros)::text as estatisticas
+    SELECT obter_estatisticas_cobertura(:rotaId, :bufferMetros, :trajetoId)::text as estatisticas
     """, nativeQuery = true)
     Optional<String> obterEstatisticasCobertura(
             @Param("rotaId") Long rotaId,
-            @Param("bufferMetros") Double bufferMetros
+            @Param("bufferMetros") Double bufferMetros,
+            @Param("trajetoId") Long trajetoId
     );
 
     /**

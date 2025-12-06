@@ -67,10 +67,10 @@ public class RotaController extends CrudController<Rota, RotaDTO> {
         try {
             var tipoResiduo = tipoResiduoService.findOne(dto.getTipoResiduoId());
             var tipoColeta = tipoColetaService.findOne(dto.getTipoColetaId());
-            
+
             Rota rota = rotaMapper.toEntity(dto, tipoResiduo, tipoColeta);
             Rota saved = service.save(rota);
-            
+
             return ResponseEntity.status(HttpStatus.CREATED).body(rotaMapper.toDTO(saved));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
@@ -138,8 +138,8 @@ public class RotaController extends CrudController<Rota, RotaDTO> {
         org.springframework.data.domain.PageRequest pageRequest = org.springframework.data.domain.PageRequest.of(page, size);
         if (order != null && asc != null) {
             pageRequest = org.springframework.data.domain.PageRequest.of(page, size,
-                asc ? org.springframework.data.domain.Sort.Direction.ASC : org.springframework.data.domain.Sort.Direction.DESC,
-                order);
+                    asc ? org.springframework.data.domain.Sort.Direction.ASC : org.springframework.data.domain.Sort.Direction.DESC,
+                    order);
         }
 
         org.springframework.data.domain.Page<Rota> entities = service.findAll(pageRequest, search);
@@ -194,12 +194,14 @@ public class RotaController extends CrudController<Rota, RotaDTO> {
             @PathVariable Long id,
 
             @Parameter(description = "Raio do buffer em metros aplicado ao redor do trajeto (padrão: 20m)")
-            @RequestParam(required = false, defaultValue = "20.0") Double bufferMetros
+            @RequestParam(required = false, defaultValue = "20.0") Double bufferMetros,
+            @Parameter(description = "ID do trajeto específico para análise (opcional)")
+            @RequestParam(required = false) Long trajetoId
     ) {
-        log.info("GET /api/rotas/{}/nao-percorridas - buffer: {}m", id, bufferMetros);
+        log.info("GET /api/rotas/{}/nao-percorridas - buffer: {}m, trajetoId: {}", id, bufferMetros, trajetoId);
 
         try {
-            AreasNaoPercorridasDTO resultado = service.calcularAreasNaoPercorridas(id, bufferMetros);
+            AreasNaoPercorridasDTO resultado = service.calcularAreasNaoPercorridas(id, bufferMetros, trajetoId);
 
             log.info("Áreas não percorridas calculadas com sucesso para rota ID: {} - Cobertura: {}%",
                     id, resultado.getEstatisticas().getPercentualCobertura());
@@ -242,12 +244,14 @@ public class RotaController extends CrudController<Rota, RotaDTO> {
             @PathVariable Long id,
 
             @Parameter(description = "Raio do buffer em metros (padrão: 20m)")
-            @RequestParam(required = false, defaultValue = "20.0") Double bufferMetros
+            @RequestParam(required = false, defaultValue = "20.0") Double bufferMetros,
+            @Parameter(description = "ID do trajeto específico para análise (opcional)")
+            @RequestParam(required = false) Long trajetoId
     ) {
-        log.info("GET /api/rotas/{}/estatisticas-cobertura - buffer: {}m", id, bufferMetros);
+        log.info("GET /api/rotas/{}/estatisticas-cobertura - buffer: {}m, trajetoId: {}", id, bufferMetros, trajetoId);
 
         try {
-            AreasNaoPercorridasDTO resultado = service.calcularAreasNaoPercorridas(id, bufferMetros);
+            AreasNaoPercorridasDTO resultado = service.calcularAreasNaoPercorridas(id, bufferMetros, trajetoId);
             return ResponseEntity.ok(resultado.getEstatisticas());
 
         } catch (RotaService.RotaNaoEncontradaException e) {
