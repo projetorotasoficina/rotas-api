@@ -67,8 +67,8 @@ public class RotaService extends CrudServiceImpl<Rota, Long> {
      * @throws ErroProcessamentoGeoespacialException em caso de erro no processamento
      */
     @Transactional(readOnly = true)
-    public AreasNaoPercorridasDTO calcularAreasNaoPercorridas(Long rotaId, Double bufferMetros) {
-        log.info("Calculando áreas não percorridas para rota ID: {} com buffer: {}m", rotaId, bufferMetros);
+    public AreasNaoPercorridasDTO calcularAreasNaoPercorridas(Long rotaId, Double bufferMetros, Long trajetoId) {
+        log.info("Calculando áreas não percorridas para rota ID: {} com buffer: {}m e trajeto ID: {}", rotaId, bufferMetros, trajetoId);
 
         // Validar buffer
         Double bufferFinal = (bufferMetros != null && bufferMetros > 0) ? bufferMetros : BUFFER_PADRAO_METROS;
@@ -90,11 +90,11 @@ public class RotaService extends CrudServiceImpl<Rota, Long> {
 
         try {
             // Obter áreas não cobertas em GeoJSON
-            String areasNaoCobertas = repository.calcularAreasNaoPercorridas(rotaId, bufferFinal)
+            String areasNaoCobertas = repository.calcularAreasNaoPercorridas(rotaId, bufferFinal, trajetoId)
                     .orElse(null);
 
             // Obter estatísticas de cobertura
-            String estatisticasJson = repository.obterEstatisticasCobertura(rotaId, bufferFinal)
+            String estatisticasJson = repository.obterEstatisticasCobertura(rotaId, bufferFinal, trajetoId)
                     .orElseThrow(() -> new ErroProcessamentoGeoespacialException(
                             "Erro ao obter estatísticas de cobertura para rota ID " + rotaId
                     ));
@@ -143,12 +143,22 @@ public class RotaService extends CrudServiceImpl<Rota, Long> {
         }
     }
 
+
     /**
      * Sobrecarga do método com buffer padrão.
      */
     @Transactional(readOnly = true)
     public AreasNaoPercorridasDTO calcularAreasNaoPercorridas(Long rotaId) {
-        return calcularAreasNaoPercorridas(rotaId, BUFFER_PADRAO_METROS);
+        return calcularAreasNaoPercorridas(rotaId, BUFFER_PADRAO_METROS, null);
+    }
+
+
+    /**
+     * Sobrecarga do método com buffer e sem trajetoId.
+     */
+    @Transactional(readOnly = true)
+    public AreasNaoPercorridasDTO calcularAreasNaoPercorridas(Long rotaId, Double bufferMetros) {
+        return calcularAreasNaoPercorridas(rotaId, bufferMetros, null);
     }
 
 // =====================================================================
