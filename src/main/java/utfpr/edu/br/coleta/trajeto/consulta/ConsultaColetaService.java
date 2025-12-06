@@ -1,4 +1,4 @@
-package utfpr.edu.br.coleta.consulta;
+package utfpr.edu.br.coleta.trajeto.consulta;
 
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Coordinate;
@@ -6,8 +6,8 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import utfpr.edu.br.coleta.consulta.dto.AgendaColetaDTO;
-import utfpr.edu.br.coleta.consulta.dto.HistoricoColetaDTO;
+import utfpr.edu.br.coleta.trajeto.consulta.dto.AgendaColetaDTO;
+import utfpr.edu.br.coleta.trajeto.consulta.dto.HistoricoColetaDTO;
 import utfpr.edu.br.coleta.rota.FrequenciaRota;
 import utfpr.edu.br.coleta.rota.Rota;
 import utfpr.edu.br.coleta.rota.RotaRepository;

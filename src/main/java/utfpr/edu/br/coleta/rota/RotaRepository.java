@@ -3,8 +3,10 @@ package utfpr.edu.br.coleta.rota;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import utfpr.edu.br.coleta.caminhao.Caminhao;
 
 import java.util.Optional;
 
@@ -15,7 +17,7 @@ import java.util.Optional;
  *
  * Autor: Pedro Henrique Sauthier
  */
-public interface RotaRepository extends JpaRepository<Rota, Long> {
+public interface RotaRepository extends JpaRepository<Rota, Long>, JpaSpecificationExecutor<Rota> {
 
     /**
      * Busca uma rota pelo Id.

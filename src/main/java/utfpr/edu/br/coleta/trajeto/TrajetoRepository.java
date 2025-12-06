@@ -1,8 +1,10 @@
 package utfpr.edu.br.coleta.trajeto;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import utfpr.edu.br.coleta.caminhao.Caminhao;
 
-public interface TrajetoRepository extends JpaRepository<Trajeto, Long> {
+public interface TrajetoRepository extends JpaRepository<Trajeto, Long> , JpaSpecificationExecutor<Trajeto> {
 
     /**
      * Busca todos os trajetos de uma rota específica, ordenados por data de início (mais recente primeiro).
