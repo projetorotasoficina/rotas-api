@@ -1,4 +1,4 @@
-package utfpr.edu.br.coleta.consulta;
+package utfpr.edu.br.coleta.trajeto.consulta;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -10,8 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import utfpr.edu.br.coleta.consulta.dto.AgendaColetaDTO;
-import utfpr.edu.br.coleta.consulta.dto.HistoricoColetaDTO;
+import utfpr.edu.br.coleta.trajeto.consulta.dto.AgendaColetaDTO;
+import utfpr.edu.br.coleta.trajeto.consulta.dto.HistoricoColetaDTO;
 import utfpr.edu.br.coleta.usuario.Usuario;
 
 import java.util.List;

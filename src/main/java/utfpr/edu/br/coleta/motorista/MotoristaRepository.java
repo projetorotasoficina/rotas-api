@@ -3,6 +3,9 @@ package utfpr.edu.br.coleta.motorista;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import utfpr.edu.br.coleta.caminhao.Caminhao;
+
 import java.util.Optional;
 
 /**
@@ -12,7 +15,7 @@ import java.util.Optional;
  *
  * Autor: Luiz Alberto dos Passos
  */
-public interface MotoristaRepository extends JpaRepository<Motorista, Long> {
+public interface MotoristaRepository extends JpaRepository<Motorista, Long> , JpaSpecificationExecutor<Motorista> {
 
     /**
      * Busca um motorista pelo CPF.
