@@ -4,8 +4,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import utfpr.edu.br.coleta.caminhao.Caminhao;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -15,7 +15,8 @@ import java.util.Optional;
  *
  * Autor: Luiz Alberto dos Passos
  */
-public interface MotoristaRepository extends JpaRepository<Motorista, Long> , JpaSpecificationExecutor<Motorista> {
+public interface MotoristaRepository extends JpaRepository<Motorista, Long>,
+        JpaSpecificationExecutor<Motorista> {
 
     /**
      * Busca um motorista pelo CPF.
@@ -41,4 +42,11 @@ public interface MotoristaRepository extends JpaRepository<Motorista, Long> , Jp
      * @return página de motoristas que correspondem à busca
      */
     Page<Motorista> findByNomeContainingIgnoreCase(String nome, Pageable pageable);
+
+    /**
+     * Retorna todos os motoristas ativos.
+     *
+     * @return lista de motoristas com flag ativo = true
+     */
+    List<Motorista> findByAtivoTrue();
 }
