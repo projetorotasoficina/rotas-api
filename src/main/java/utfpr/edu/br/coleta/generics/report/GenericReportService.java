@@ -41,6 +41,9 @@ public class GenericReportService {
         repositoryMap.put("trajeto", trajetoRepository);
         repositoryMap.put("usuario", usuarioRepository);
 
+        repositoryMap.put("tipocoleta", tipoColetaRepository);
+        repositoryMap.put("tiporesiduo", tipoResiduoRepository);
+
     }
 
     /**
@@ -84,6 +87,8 @@ public class GenericReportService {
 
     /**
      * Converte uma única Entidade JPA para um Map<String, Object> usando Reflection.
+     * IMPORTANTE: Ignora relacionamentos (@ManyToOne, @OneToMany, etc) para evitar JSON gigante
+     * e problemas de serialização circular.
      */
     private Map<String, Object> convertEntityToMap(Object entity) {
         Map<String, Object> map = new HashMap<>();
@@ -92,10 +97,42 @@ public class GenericReportService {
         // Percorre todos os campos da entidade
         for (Field field : clazz.getDeclaredFields()) {
             try {
+                if (field.isAnnotationPresent(jakarta.persistence.ManyToOne.class) ||
+                    field.isAnnotationPresent(jakarta.persistence.OneToMany.class) ||
+                    field.isAnnotationPresent(jakarta.persistence.ManyToMany.class) ||
+                    field.isAnnotationPresent(jakarta.persistence.OneToOne.class)) {
+
+                    if (field.isAnnotationPresent(jakarta.persistence.ManyToOne.class)) {
+                        field.setAccessible(true);
+                        Object relatedEntity = field.get(entity);
+                        if (relatedEntity != null) {
+                            try {
+                                Field idField = relatedEntity.getClass().getDeclaredField("id");
+                                idField.setAccessible(true);
+                                Object relatedId = idField.get(relatedEntity);
+                                map.put(field.getName() + "Id", relatedId);
+                            } catch (NoSuchFieldException e) {
+                            }
+                        }
+                    }
+                    continue;
+                }
+
                 field.setAccessible(true); // Permite acesso a campos privados
-                map.put(field.getName(), field.get(entity));
+                Object value = field.get(entity);
+
+                if (value == null ||
+                    value instanceof String ||
+                    value instanceof Number ||
+                    value instanceof Boolean ||
+                    value instanceof java.time.LocalDate ||
+                    value instanceof java.time.LocalDateTime ||
+                    value instanceof java.util.Date ||
+                    value.getClass().isEnum()) {
+                    map.put(field.getName(), value);
+                }
+
             } catch (IllegalAccessException e) {
-                // Ignora campos inacessíveis
             }
         }
         return map;
