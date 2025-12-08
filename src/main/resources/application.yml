@@ -61,4 +61,4 @@ minio:
   access-key: ${MINIO_ACCESS_KEY:}
   secret-key: ${MINIO_SECRET_KEY:}
   region: ${MINIO_REGION:us-east-1}
-  secure: ${MINIO_SECURE:false}
+  secure: ${MINIO_SECURE:true}
