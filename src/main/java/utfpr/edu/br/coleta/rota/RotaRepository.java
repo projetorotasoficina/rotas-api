@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import utfpr.edu.br.coleta.caminhao.Caminhao;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -102,4 +103,6 @@ public interface RotaRepository extends JpaRepository<Rota, Long>, JpaSpecificat
     WHERE id = :rotaId
     """, nativeQuery = true)
     Optional<Boolean> possuiAreaGeografica(@Param("rotaId") Long rotaId);
+
+    List<Rota> findByTipoColetaIdAndTipoResiduoIdAndAtivoTrue(Long tipoColetaId, Long tipoResiduoId);
 }

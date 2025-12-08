@@ -60,15 +60,14 @@ public class CaminhaoServiceImpl extends CrudServiceImpl<Caminhao, Long> impleme
      * @return lista de rotas compatíveis
      */
     @Override
-    @Transactional(readOnly = true)
     public List<Rota> listarRotasCompativeis(Long caminhaoId) {
+
         Caminhao caminhao = repository.findById(caminhaoId)
-                .orElseThrow(() -> new IllegalArgumentException("Caminhão não encontrado."));
+                .orElseThrow(() -> new EntityNotFoundException("Caminhão não encontrado"));
 
-        List<Rota> rotasAtivas = rotaRepository.findByAtivoTrue();
-
-        return rotasAtivas.stream()
-                .filter(rota -> rotaCaminhaoValidator.podeAtender(caminhao, rota))
-                .toList();
+        return rotaRepository.findByTipoColetaIdAndTipoResiduoIdAndAtivoTrue(
+                caminhao.getTipoColeta().getId(),
+                caminhao.getResiduo().getId()
+        );
     }
 }
