@@ -96,7 +96,16 @@ public class CaminhaoController extends CrudController<Caminhao, CaminhaoDTO> {
     @GetMapping("/{id}/rotas-compativeis")
     public List<RotaDTO> listarRotasCompativeis(@PathVariable Long id) {
         return service.listarRotasCompativeis(id).stream()
-                .map(rota -> modelMapper.map(rota, RotaDTO.class))
+                .map(rota -> {
+                    RotaDTO dto = new RotaDTO();
+                    dto.setId(rota.getId());
+                    dto.setNome(rota.getNome());
+                    dto.setAtivo(rota.getAtivo());
+                    dto.setObservacoes(rota.getObservacoes());
+                    dto.setTipoColetaId(rota.getTipoColeta().getId());
+                    dto.setTipoResiduoId(rota.getTipoResiduo().getId());
+                    return dto;
+                })
                 .toList();
     }
 }
