@@ -39,6 +39,28 @@ public class GenericSpecification<T> implements Specification<T> {
                 continue;
             }
 
+            // Tratamento especial para o parâmetro "search"
+            if ("search".equalsIgnoreCase(key)) {
+                List<Predicate> searchPredicates = new ArrayList<>();
+
+                root.getModel().getAttributes().forEach(attribute -> {
+                    if (attribute.getJavaType().equals(String.class)) {
+                        try {
+                            Path<String> path = root.get(attribute.getName());
+                            searchPredicates.add(
+                                builder.like(builder.lower(path), "%" + value.toLowerCase() + "%")
+                            );
+                        } catch (Exception e) {
+                        }
+                    }
+                });
+
+                if (!searchPredicates.isEmpty()) {
+                    predicates.add(builder.or(searchPredicates.toArray(new Predicate[0])));
+                }
+                continue;
+            }
+
             try {
                 // 1. Obter o Path (caminho) para o campo, suportando notação de ponto
                 Path expression = getPath(root, key);
