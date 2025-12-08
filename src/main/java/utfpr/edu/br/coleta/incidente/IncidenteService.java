@@ -70,4 +70,32 @@ public class IncidenteService extends CrudServiceImpl<Incidente, Long> {
         dto.setFotoUrl(incidente.getFotoUrl());
         return dto;
     }
+
+    public List<IncidenteDTO> buscarParaRelatorio(LocalDateTime dataInicio, LocalDateTime dataFim, Long rotaId) {
+        List<Incidente> incidentes;
+
+        if (dataInicio != null && dataFim != null && rotaId != null) {
+            incidentes = repository.findByTsBetweenAndTrajetoRotaId(dataInicio, dataFim, rotaId);
+        } else if (dataInicio != null && dataFim != null) {
+            incidentes = repository.findByTsBetween(dataInicio, dataFim);
+        } else if (rotaId != null) {
+            incidentes = repository.findByTrajetoRotaId(rotaId);
+        } else {
+            incidentes = repository.findAll();
+        }
+
+        return incidentes.stream()
+                .map(this::convertToDTOComRota)
+                .toList();
+    }
+
+    private IncidenteDTO convertToDTOComRota(Incidente incidente) {
+        IncidenteDTO dto = convertToDTO(incidente);
+
+        if (incidente.getTrajeto() != null && incidente.getTrajeto().getRota() != null) {
+            dto.setRotaNome(incidente.getTrajeto().getRota().getNome());
+        }
+
+        return dto;
+    }
 }

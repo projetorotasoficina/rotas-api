@@ -14,4 +14,5 @@ public class IncidenteDTO {
     private Double lat;
     private Double lng;
     private String fotoUrl;
+    private String rotaNome;
 }
