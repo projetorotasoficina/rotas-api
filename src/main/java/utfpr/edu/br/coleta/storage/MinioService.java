@@ -2,50 +2,49 @@ package utfpr.edu.br.coleta.storage;
 
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
-import io.minio.errors.MinioException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.UUID;
-
 @Service
 public class MinioService {
-
-    private final MinioClient minioClient;
-
-    @Value("${minio.bucket-name}")
-    private String bucketName;
 
     @Value("${minio.url}")
     private String minioUrl;
 
-    public MinioService(MinioClient minioClient) {
-        this.minioClient = minioClient;
+    @Value("${minio.bucket}")
+    private String bucket;
+
+    @Value("${minio.access-key}")
+    private String access;
+
+    @Value("${minio.secret-key}")
+    private String secret;
+
+    private MinioClient client() {
+        return MinioClient.builder()
+                .endpoint(minioUrl)
+                .credentials(access, secret)
+                .build();
     }
 
     public String uploadFile(MultipartFile file, String folder) {
         try {
-            String originalFilename = file.getOriginalFilename();
-            String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-            String objectName = folder + "/" + UUID.randomUUID().toString() + extension;
+            String name = folder + "/" + System.currentTimeMillis() + "_" + file.getOriginalFilename();
 
-            minioClient.putObject(
+            client().putObject(
                     PutObjectArgs.builder()
-                            .bucket(bucketName)
-                            .object(objectName)
+                            .bucket(bucket)
+                            .object(name)
                             .stream(file.getInputStream(), file.getSize(), -1)
                             .contentType(file.getContentType())
-                            .build());
+                            .build()
+            );
 
-            return minioUrl + "/" + bucketName + "/" + objectName;
+            return minioUrl + "/" + bucket + "/" + name;
 
-        } catch (MinioException | InvalidKeyException | NoSuchAlgorithmException | IOException e) {
-            // Em um ambiente de produção, você deve logar o erro e lançar uma exceção de negócio
-            throw new RuntimeException("Erro ao fazer upload do arquivo para o MinIO", e);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao fazer upload no MinIO", e);
         }
     }
 }
