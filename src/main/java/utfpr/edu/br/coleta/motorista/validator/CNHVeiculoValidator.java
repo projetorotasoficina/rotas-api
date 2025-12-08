@@ -102,7 +102,7 @@ public class CNHVeiculoValidator {
      * @param caminhao Caminhão a ser validado
      * @return true se o motorista pode dirigir o caminhão, false caso contrário
      */
-    public boolean podeConduzi(Motorista motorista, Caminhao caminhao) {
+    public boolean podeConduzir(Motorista motorista, Caminhao caminhao) {
         try {
             validar(motorista, caminhao);
             return true;

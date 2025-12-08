@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface CaminhaoRepository extends JpaRepository<Caminhao, Long>, JpaSpecificationExecutor<Caminhao> {
@@ -20,4 +21,12 @@ public interface CaminhaoRepository extends JpaRepository<Caminhao, Long>, JpaSp
      * @return página de caminhões que correspondem à busca
      */
     Page<Caminhao> findByModeloContainingIgnoreCaseOrPlacaContainingIgnoreCase(String modelo, String placa, Pageable pageable);
+
+    /**
+     * Retorna todos os caminhões ativos.
+     *
+     * @return lista de caminhões com flag ativo = true
+     */
+    List<Caminhao> findByAtivoTrue();
+
 }
