@@ -4,15 +4,27 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import utfpr.edu.br.coleta.generics.CrudServiceImpl;
+import utfpr.edu.br.coleta.rota.Rota;
+import utfpr.edu.br.coleta.rota.RotaRepository;
+import utfpr.edu.br.coleta.rota.validator.RotaCaminhaoValidator;
+
+import java.util.List;
 
 @Service
 public class CaminhaoServiceImpl extends CrudServiceImpl<Caminhao, Long> implements CaminhaoService {
 
     private final CaminhaoRepository repository;
+    private final RotaRepository rotaRepository;
+    private final RotaCaminhaoValidator rotaCaminhaoValidator;
 
-    public CaminhaoServiceImpl(CaminhaoRepository repository) {
+    public CaminhaoServiceImpl(CaminhaoRepository repository,
+                               RotaRepository rotaRepository,
+                               RotaCaminhaoValidator rotaCaminhaoValidator) {
         this.repository = repository;
+        this.rotaRepository = rotaRepository;
+        this.rotaCaminhaoValidator = rotaCaminhaoValidator;
     }
 
     @Override
@@ -25,9 +37,9 @@ public class CaminhaoServiceImpl extends CrudServiceImpl<Caminhao, Long> impleme
         Caminhao caminhao = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Caminhão não encontrado"));
 
-        //if (caminhao.getTrajetos() != null && !caminhao.getTrajetos().isEmpty()) {
-       //     throw new IllegalStateException("Não é possível excluir caminhão vinculado a trajetos.");
-      //  }
+        // if (caminhao.getTrajetos() != null && !caminhao.getTrajetos().isEmpty()) {
+        //     throw new IllegalStateException("Não é possível excluir caminhão vinculado a trajetos.");
+        // }
 
         repository.delete(caminhao);
     }
@@ -38,5 +50,25 @@ public class CaminhaoServiceImpl extends CrudServiceImpl<Caminhao, Long> impleme
             return findAll(pageable);
         }
         return repository.findByModeloContainingIgnoreCaseOrPlacaContainingIgnoreCase(search, search, pageable);
+    }
+
+    /**
+     * Lista as rotas compatíveis com o caminhão informado,
+     * considerando tipo de coleta e tipo de resíduo.
+     *
+     * @param caminhaoId ID do caminhão
+     * @return lista de rotas compatíveis
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<Rota> listarRotasCompativeis(Long caminhaoId) {
+        Caminhao caminhao = repository.findById(caminhaoId)
+                .orElseThrow(() -> new IllegalArgumentException("Caminhão não encontrado."));
+
+        List<Rota> rotasAtivas = rotaRepository.findByAtivoTrue();
+
+        return rotasAtivas.stream()
+                .filter(rota -> rotaCaminhaoValidator.podeAtender(caminhao, rota))
+                .toList();
     }
 }
