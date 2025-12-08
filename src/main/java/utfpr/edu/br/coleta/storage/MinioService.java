@@ -13,21 +13,21 @@ import java.util.UUID;
 @Service
 public class MinioService {
 
-    @Value("${minio.url:}")
+    @Value("${MINIO_ENDPOINT}")
     private String minioUrl;
 
-    @Value("${minio.bucket:}")
+    @Value("${MINIO_BUCKET}")
     private String bucket;
 
-    @Value("${minio.access-key:}")
+    @Value("${MINIO_ACCESS_KEY}")
     private String access;
 
-    @Value("${minio.secret-key:}")
+    @Value("${MINIO_SECRET_KEY}")
     private String secret;
 
     private MinioClient client() {
         if (minioUrl == null || minioUrl.isBlank()) {
-            throw new IllegalStateException("MinIO não configurado (minio.url vazio).");
+            throw new IllegalStateException("MinIO não configurado (MINIO_ENDPOINT vazio).");
         }
 
         return MinioClient.builder()
@@ -36,8 +36,6 @@ public class MinioService {
                 .build();
     }
 
-
-
     public String uploadFile(MultipartFile file, String folder) {
         try {
             MinioClient c = client();
@@ -45,6 +43,7 @@ public class MinioService {
             boolean exists = c.bucketExists(
                     BucketExistsArgs.builder().bucket(bucket).build()
             );
+
             if (!exists) {
                 c.makeBucket(
                         MakeBucketArgs.builder().bucket(bucket).build()
