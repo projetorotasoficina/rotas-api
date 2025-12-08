@@ -41,11 +41,9 @@ public class PontoTrajetoServiceImpl extends CrudServiceImpl<PontoTrajeto, Long>
     @Override
     public PontoTrajetoDTO registrarPonto(PontoTrajetoCreateDTO dto) {
 
-        // *** CRIA SEM ID PRA FORÇAR INSERT ***
         PontoTrajeto ponto = new PontoTrajeto();
         ponto.setId(null);
 
-        // Coordenada JTS é (x=lon, y=lat)
         Point point = geometryFactory.createPoint(
                 new org.locationtech.jts.geom.Coordinate(dto.getLongitude(), dto.getLatitude())
         );
@@ -57,7 +55,10 @@ public class PontoTrajetoServiceImpl extends CrudServiceImpl<PontoTrajeto, Long>
         ponto.setHorario(dto.getHorario());
         ponto.setObservacao(dto.getObservacao());
 
-        return mapper.map(repository.save(ponto), PontoTrajetoDTO.class);
+        PontoTrajeto salvo = repository.save(ponto);
+
+        // usa o conversor manual que pega X/Y do Point
+        return convertToDTO(salvo);
     }
 
     @Override
