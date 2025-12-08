@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import utfpr.edu.br.coleta.generics.CrudController;
 import utfpr.edu.br.coleta.motorista.MotoristaDTO;
 import utfpr.edu.br.coleta.motorista.MotoristaService;
+import utfpr.edu.br.coleta.rota.dto.RotaDTO;
 
 import java.util.List;
 
@@ -68,6 +69,34 @@ public class CaminhaoController extends CrudController<Caminhao, CaminhaoDTO> {
     public List<MotoristaDTO> listarMotoristasCompativeis(@PathVariable Long id) {
         return motoristaService.listarMotoristasCompativeis(id).stream()
                 .map(m -> modelMapper.map(m, MotoristaDTO.class))
+                .toList();
+    }
+
+    /**
+     * Retorna as rotas compatíveis com o caminhão informado.
+     *
+     * A compatibilidade é determinada pelo tipo de coleta e pelo tipo
+     * de resíduo definidos no caminhão e na rota. Apenas rotas ativas
+     * e totalmente compatíveis são retornadas.
+     *
+     * Este endpoint é utilizado pelo sistema administrativo para
+     * organizar a logística e evitar incompatibilidades de operação.
+     *
+     * @param id ID do caminhão
+     * @return lista de rotas compatíveis com o caminhão
+     */
+    @Operation(
+            summary = "Lista rotas compatíveis com o caminhão",
+            description = "Retorna somente rotas ativas cujo tipo de coleta e tipo de resíduo são compatíveis com o caminhão fornecido."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Caminhão não encontrado")
+    })
+    @GetMapping("/{id}/rotas-compativeis")
+    public List<RotaDTO> listarRotasCompativeis(@PathVariable Long id) {
+        return service.listarRotasCompativeis(id).stream()
+                .map(rota -> modelMapper.map(rota, RotaDTO.class))
                 .toList();
     }
 }
