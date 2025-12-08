@@ -14,6 +14,10 @@ import utfpr.edu.br.coleta.generics.CrudController;
 import utfpr.edu.br.coleta.generics.ICrudService;
 import utfpr.edu.br.coleta.incidente.dto.IncidenteDTO;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+
 @RestController
 @RequestMapping("/incidentes")
 public class IncidenteController extends CrudController<Incidente, IncidenteDTO> {
@@ -75,5 +79,29 @@ public class IncidenteController extends CrudController<Incidente, IncidenteDTO>
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(service.convertToDTO(incidente));
+    }
+
+    @GetMapping("/relatorio")
+    @Operation(summary = "Busca incidentes filtrados para relatório")
+    public ResponseEntity<List<IncidenteDTO>> buscarParaRelatorio(
+            @Parameter(description = "Data de início no formato ISO (yyyy-MM-dd'T'HH:mm:ss)")
+            @RequestParam(required = false) String dataInicio,
+            @Parameter(description = "Data de fim no formato ISO (yyyy-MM-dd'T'HH:mm:ss)")
+            @RequestParam(required = false) String dataFim,
+            @Parameter(description = "ID da rota para filtrar")
+            @RequestParam(required = false) Long rotaId
+    ) {
+        LocalDateTime inicio = null;
+        LocalDateTime fim = null;
+
+        if (dataInicio != null && !dataInicio.isEmpty()) {
+            inicio = LocalDateTime.parse(dataInicio, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        }
+        if (dataFim != null && !dataFim.isEmpty()) {
+            fim = LocalDateTime.parse(dataFim, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        }
+
+        List<IncidenteDTO> incidentes = service.buscarParaRelatorio(inicio, fim, rotaId);
+        return ResponseEntity.ok(incidentes);
     }
 }
